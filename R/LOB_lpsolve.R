@@ -1,4 +1,4 @@
-LOB_lpsolve <- function(LOBpeaklist,choose_class=NULL) {
+LOB_lpsolve <- function(LOBpeaklist,choose_class=NULL,save.files=FALSE) {
 
   library(lpSolve)
   library(ggplot2)
@@ -174,27 +174,37 @@ LOB_lpsolve <- function(LOBpeaklist,choose_class=NULL) {
       run[which(bar!=nrow(solutions) & bar!=0 ),"Type"] <- 'Maybe'
       run[which(bar==nrow(solutions)),"Type"] <- 'Yes'
 
-      print(ggplot(run,aes(x = peakgroup_rt, y = LOBdbase_mz,color=Type)) +
-              scale_color_manual(values=c("#e7cd08", "#e70808", "#08e799")) +
-              geom_point() +
-              geom_text(label=paste0(as.character(run$FA_total_no_C), ":",
-                                     as.character(run$FA_total_no_DB)),
-                        hjust = 1,
-                        vjust = 2,
-                        size=2,
-                        color="black")+
-              ggtitle(paste0("lpSolve Screened Data - ", as.character(run$species))) +
-              xlab("Peak Group Retention Time (sec)")+
-              ylab("Peak Group m/z")
-
-      )
-      ggsave(filename = paste0(as.character(run$species), "_LP_solve_MZRT_KimT.tiff"),
-             plot = last_plot(),
-             device = "tiff",
-             width = 22, height = 17)
-
       return[return$match_ID %in% run$match_ID,"lpSolve"] <- run$Type
     }
   }
+  
+  i <- NULL
+  for (i in 1:length(unique(PRErun$species))){
+    
+  run <- return[return$species == unique(PRErun$species)[1],]
+  run <-run[run$match_ID %in% LOBpeaklist$match_ID,]
+    
+  print(ggplot(run,aes(x = peakgroup_rt, y = LOBdbase_mz,color=lpSolve)) +
+          scale_color_manual(values=c("#e7cd08", "#e70808", "#08e799")) +
+          geom_point() +
+          geom_text(label=paste0(as.character(run$FA_total_no_C), ":",
+                                 as.character(run$FA_total_no_DB)),
+                    hjust = 1,
+                    vjust = 2,
+                    size=2,
+                    color="black")+
+          ggtitle(paste0("lpSolve Screened Data - ", as.character(run$species))) +
+          xlab("Peak Group Retention Time (sec)")+
+          ylab("Peak Group m/z")
+        
+  )
+  if (save.files==TRUE){
+  ggsave(filename = paste0(as.character(run$species), "_LP_solve.tiff"),
+         plot = last_plot(),
+         device = "tiff",
+         width = 22, height = 17)
+  }
+  }
+  
   return(return)
 }
