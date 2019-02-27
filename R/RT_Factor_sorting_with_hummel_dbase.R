@@ -140,7 +140,7 @@ RT_Factor_Sort <- function(original_data, RT_Factor_Dbase){
 
   Flagged_Data <- original_data
   Flagged_Data[Flagged_Data$match_ID %in% Combined$match_ID, "Flag"] <- as.character(Combined$Flag)
-  Flagged_Data <<- Flagged_Data
+  return(Flagged_Data)
 }
 
 #
