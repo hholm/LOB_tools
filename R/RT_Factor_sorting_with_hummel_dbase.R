@@ -69,7 +69,7 @@ RT_Factor_Sort <- function(original_data, RT_Factor_Dbase){
 
   # Add column for DNPPE factor and an empty one for flagging
   original_data <- original_data %>%
-    mutate(DNPPE_Factor = peakgroup_rt/DNPPE_RT, Flag = "None") %>%
+    mutate(DNPPE_Factor = peakgroup_rt/DNPPE_RT, Flag = "None", DBase_DNPPE_RF = "NA") %>%
     filter(species != "NA")
 
   # isolate major intact polar lipid classes, unoxidized (need to add pigments, etc.)
@@ -86,7 +86,8 @@ RT_Factor_Sort <- function(original_data, RT_Factor_Dbase){
              species == "SQDG"|
              species == "TAG"|
              species == "DAG"|
-             species == "FFA")
+             species == "FFA"
+           )
 
   # isolate oxidized lipids into df
   Ox_Lipids <- original_data %>%
@@ -113,7 +114,9 @@ RT_Factor_Sort <- function(original_data, RT_Factor_Dbase){
   # first check if it's in a 10%
 
   for (i in 1:length(Known_RtFs$compound_name)){
-    which_row <- as.numeric(which(grepl(paste0("^", Known_RtFs$compound_name[i], "$"), RT_Factor_Dbase$compound_name)))
+
+  which_row <- as.numeric(which(grepl(paste0("^", Known_RtFs$compound_name[i], "$"), RT_Factor_Dbase$compound_name)))
+    Known_RtFs$DBase_DNPPE_RF[i] = RT_Factor_Dbase$Mean_DNPPE_Factor[which_row]
 
     if(Known_RtFs$DNPPE_Factor[i] < (RT_Factor_Dbase$Mean_DNPPE_Factor[which_row]*1.1) & Known_RtFs$DNPPE_Factor[i] > (RT_Factor_Dbase$Mean_DNPPE_Factor[which_row]*0.9)){
       if(Known_RtFs$DNPPE_Factor[i] < (RT_Factor_Dbase$Mean_DNPPE_Factor[which_row]*1.05) & Known_RtFs$DNPPE_Factor[i] > (RT_Factor_Dbase$Mean_DNPPE_Factor[which_row]*0.95)){
@@ -136,10 +139,19 @@ RT_Factor_Sort <- function(original_data, RT_Factor_Dbase){
   Combined <- rbind(Known_RtFs, Unknown_RtFs)
 
   # change levels of colors so they plot in the right order
-  Combined$Flag = factor(Combined$Flag, levels = c("Red", "ms2v", "5%_rtv", "10%_rtv", "Unknown"))
+  #Combined$Flag = factor(Combined$Flag, levels = c("Red", "ms2v", "5%_rtv", "10%_rtv", "Unknown"))
 
   Flagged_Data <- original_data
-  Flagged_Data[Flagged_Data$match_ID %in% Combined$match_ID, "Flag"] <- as.character(Combined$Flag)
+  Flagged_Data$Flag <- rep("Unknown", length(Flagged_Data$Flag))
+
+  for (j in 1:length(Combined$match_ID)){
+    match_row <- as.numeric(which(grepl(paste0("^", Combined$match_ID[j], "$"), Flagged_Data$match_ID)))
+    Flagged_Data$Flag[match_row] = as.character(Combined$Flag[j])
+    Flagged_Data$DBase_DNPPE_RF[match_row] = Combined$DBase_DNPPE_RF[j]
+  }
+
+  Flagged_Data$Flag = factor(Flagged_Data$Flag, levels = c("Red", "ms2v", "5%_rtv", "10%_rtv", "Unknown"))
+
   return(Flagged_Data)
 }
 
