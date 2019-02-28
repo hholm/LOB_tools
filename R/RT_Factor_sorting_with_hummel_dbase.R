@@ -3,7 +3,7 @@
 # Feb. 20, 2019
 # input a raw lobset
 
-RT_Factor_Sort <- function(original_data, RT_Factor_Dbase){
+RT_Factor_Sort <- function(original_data, RT_Factor_Dbase, choose_class = FALSE, plot_data = FALSE, save_plots = FALSE, data_title){
 
   library(tidyverse)
 
@@ -64,7 +64,7 @@ RT_Factor_Sort <- function(original_data, RT_Factor_Dbase){
   original_data$peakgroup_rt <- as.numeric(original_data$peakgroup_rt)
 
   # Extract correct DNPPE retention time
-  DNPPE_RT <- original_data$peakgroup_rt[which(grepl("DNPPE", original_data$compound_name))]
+  DNPPE_RT <- as.numeric(original_data$peakgroup_rt[which(grepl("DNPPE", original_data$compound_name))])
   #DNPPE_RT <- DNPPE_RT[***]  #if there are two DNPPE peaks, index to the correct one
 
   # Add column for DNPPE factor and an empty one for flagging
@@ -75,19 +75,16 @@ RT_Factor_Sort <- function(original_data, RT_Factor_Dbase){
   # isolate major intact polar lipid classes, unoxidized (need to add pigments, etc.)
   Main_Lipids <- original_data %>%
     filter(degree_oxidation == "0",
-           species == "BLL"|
-             species == "DGCC" |
-             species == "DGTS_DGTA" |
-             species == "PE" |
-             species == "PG" |
-             species == "PC" |
-             species == "MGDG" |
-             species == "DGDG" |
-             species == "SQDG"|
-             species == "TAG"|
-             species == "DAG"|
-             species == "FFA"
+           lipid_class == "IP_DAG"|
+             lipid_class == "IP_MAG"|
+             lipid_class == "TAG"
            )
+
+  # if you're choosing a class
+  if(choose_class != FALSE){
+    Main_Lipids <- original_data[original_data$species == choose_class, ] %>%
+      filter(degree_oxidation == "0")
+  }
 
   # isolate oxidized lipids into df
   Ox_Lipids <- original_data %>%
@@ -151,37 +148,43 @@ RT_Factor_Sort <- function(original_data, RT_Factor_Dbase){
   }
 
   Flagged_Data$Flag = factor(Flagged_Data$Flag, levels = c("Red", "ms2v", "5%_rtv", "10%_rtv", "Unknown"))
+  Flagged_Data$DBase_DNPPE_RF <- as.numeric(Flagged_Data$DBase_DNPPE_RF)
+
+
+  if(plot_data == TRUE){
+    #####################
+    # From here, giving the option to generate mz vs. rt graphs
+    # for each of the major classes.
+
+    # add a column for plot labelling by C and DB #
+    lipidclass <- Flagged_Data %>%
+      mutate(C_DB = paste0(str_extract(FA_total_no_C, "\\d+"), ":", str_extract(FA_total_no_DB, "\\d+"))) %>%
+      filter(degree_oxidation == 0)
+
+    # going through the big nine lipids plus TAGs, DAGs, and FFAs
+    lipid_classes <- unique(Main_Lipids$species)
+
+    # and plot each, saving a copy to the working directory
+    for (i in 1:length(lipid_classes)){
+      Lipid <- lipidclass %>%
+        filter(species == paste(lipid_classes[i]))
+
+      print(ggplot(data = Lipid)+
+              geom_point(aes(x = peakgroup_rt, y = LOBdbase_mz, color =  Flag))+
+              geom_point(aes(x = DBase_DNPPE_RF*DNPPE_RT, y = LOBdbase_mz, color =  Flag))+
+              geom_errorbarh(aes(xmax = DBase_DNPPE_RF*DNPPE_RT*1.1, xmin = DBase_DNPPE_RF*DNPPE_RT*0.9, height = 0.2, y = LOBdbase_mz, color = Flag))+
+              geom_text(aes(x = peakgroup_rt, y = LOBdbase_mz, label = C_DB, hjust = 1, vjust = 2, color = Flag))+
+              ggtitle(paste0("M/Z vs. RT in ", lipid_classes[i])))
+
+      if(save_plots == TRUE){
+      ggsave(filename = paste0(lipid_classes[i], "_MZRT_Flag_", data_title, ".tiff"),
+             plot = last_plot(),
+             device = "tiff",
+             width = 22, height = 17)
+      }
+    }
+  }
 
   return(Flagged_Data)
 }
 
-#
-# RT_Factor_Sort(original_data, RT_Factor_Dbase)
-#
-# #####################
-# # From here, giving the option to generate mz vs. rt graphs
-# # for each of the major classes.
-#
-# # add a column for plot labelling by C and DB #
-# lipidclass <- Flagged_Data %>%
-#   mutate(C_DB = paste0(str_extract(FA_total_no_C, "\\d+"), ":", str_extract(FA_total_no_DB, "\\d+")))
-#
-# # going through the big nine lipids plus TAGs, DAGs, and FFAs
-# lipid_classes <- c("DGCC", "DGTS_DGTA", "PC", "PE", "PG", "MGDG", "DGDG", "SQDG", "TAG", "DAG", "FFA")
-#
-# # and plot each, saving a copy to the working directory
-# for (i in 1:length(lipid_classes)){
-#   Lipid <- lipidclass %>%
-#     filter(species == paste(lipid_classes[i]))
-#
-#   print(ggplot(Lipid, aes(x = DNPPE_Factor, y = LOBdbase_mz, color =  Flag))+
-#     geom_point()+
-#     geom_errorbarh(aes(xmax = RTF_Window*1.1, xmin = RTF_Window*0.9, height = 0.2))+
-#     geom_text(aes(label = C_DB, hjust = 1, vjust = 2))+
-#     ggtitle(paste0("M/Z vs. RT in ", lipid_classes[i])))
-#   # ggsave(filename = paste0(lipid_classes[i], "_MZRT_Nicole.tiff"),
-#   #        plot = last_plot(),
-#   #        device = "tiff",
-#   #        width = 22, height = 17)
-#
-#   }
