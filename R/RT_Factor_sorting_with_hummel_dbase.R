@@ -174,8 +174,8 @@ RT_Factor_Sort <- function(original_data, RT_Factor_Dbase, choose_class = FALSE,
         filter(species == paste(lipid_classes[i]))
 
       print(ggplot(data = Lipid)+
-              geom_point(aes(x = peakgroup_rt, y = LOBdbase_mz, color =  Flag))+
-              geom_point(aes(x = DBase_DNPPE_RF*DNPPE_RT, y = LOBdbase_mz, color =  Flag))+
+              geom_point(aes(x = peakgroup_rt, y = LOBdbase_mz, color =  Flag, size = 0.05))+
+              geom_point(aes(x = DBase_DNPPE_RF*DNPPE_RT, y = LOBdbase_mz, color =  Flag), shape = 3)+
               geom_errorbarh(aes(xmax = DBase_DNPPE_RF*DNPPE_RT*1.1, xmin = DBase_DNPPE_RF*DNPPE_RT*0.9, height = 0.2, y = LOBdbase_mz, color = Flag))+
               geom_text(aes(x = peakgroup_rt, y = LOBdbase_mz, label = C_DB, hjust = 1, vjust = 2, color = Flag))+
               ggtitle(paste0("M/Z vs. RT in ", lipid_classes[i])))
