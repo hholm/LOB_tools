@@ -103,8 +103,11 @@ RT_Factor_Sort <- function(original_data, RT_Factor_Dbase, choose_class = FALSE,
     }else{
       Main_Lipids$Flag[i] = "Unknown"
     }
-
+    cat("\r")
+    flush.console()
+    cat("Checking for databases entries.","Compound",i,"of",length(Main_Lipids$compound_name),"...")
   }
+cat("Done!")
 
   # separate into two dfs
   Known_RtFs <- Main_Lipids %>% filter(Flag == "Known")
@@ -113,7 +116,7 @@ RT_Factor_Sort <- function(original_data, RT_Factor_Dbase, choose_class = FALSE,
   # for each compound in the "Known" df, grab its corresponding row number in RT_Factor_Dbase,
   # then flag it as follows
   # first check if it's in a 10%
-
+cat("\n")
   for (i in 1:length(Known_RtFs$compound_name)){
 
   which_row <- as.numeric(which(grepl(paste0("^", Known_RtFs$compound_name[i], "$"), RT_Factor_Dbase$compound_name)))
@@ -132,8 +135,13 @@ RT_Factor_Sort <- function(original_data, RT_Factor_Dbase, choose_class = FALSE,
     }else{
       Known_RtFs$Flag[i] = "Red"
     }
-  }
 
+    cat("\r")
+    flush.console()
+    cat("Comparing database RtFs to data.","Compound",i,"of",length(Known_RtFs$compound_name),"...")
+
+    }
+cat("Done!")
 
 
   # combine known and unknown dfs
@@ -145,11 +153,17 @@ RT_Factor_Sort <- function(original_data, RT_Factor_Dbase, choose_class = FALSE,
   Flagged_Data <- original_data
   Flagged_Data$Flag <- rep("Unknown", length(Flagged_Data$Flag))
 
+  cat("\n")
   for (j in 1:length(Combined$match_ID)){
     match_row <- as.numeric(which(grepl(paste0("^", Combined$match_ID[j], "$"), Flagged_Data$match_ID)))
     Flagged_Data$Flag[match_row] = as.character(Combined$Flag[j])
     Flagged_Data$DBase_DNPPE_RF[match_row] = Combined$DBase_DNPPE_RF[j]
+
+    cat("\r")
+    flush.console()
+    cat("Combining data.","Compound",j,"of",length(Combined$match_ID),"...")
   }
+cat("Done!")
 
   Flagged_Data$Flag = factor(Flagged_Data$Flag, levels = c("Red", "ms2v", "5%_rtv", "10%_rtv", "Unknown"))
   Flagged_Data$DBase_DNPPE_RF <- as.numeric(Flagged_Data$DBase_DNPPE_RF)
@@ -169,6 +183,7 @@ RT_Factor_Sort <- function(original_data, RT_Factor_Dbase, choose_class = FALSE,
     lipid_classes <- unique(Main_Lipids$species)
 
     # and plot each, saving a copy to the working directory
+    cat("\n")
     for (i in 1:length(lipid_classes)){
       Lipid <- lipidclass %>%
         filter(species == paste(lipid_classes[i]))
@@ -186,7 +201,11 @@ RT_Factor_Sort <- function(original_data, RT_Factor_Dbase, choose_class = FALSE,
              device = "tiff",
              width = 22, height = 17)
       }
+      cat("\r")
+      flush.console()
+      cat("Generating plot",i,"of",length(lipid_classes),"...")
     }
+    cat("Done!")
   }
 
   return(Flagged_Data)
