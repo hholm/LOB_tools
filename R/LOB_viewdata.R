@@ -58,7 +58,7 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
           column(4,
                  selectInput('class', 'Select Lipid Class', c("All", as.character(unique(run$species))), multiple = TRUE, selected = "All"),
                  selectInput('color', 'Point Color', c('None','Carbon','Double Bonds','lpSolve Fitted', 'RF_Window', 'Lipid Class')),
-                 selectInput('plot_extras', 'Facet Row', c(None='.',"RTF_Window"),
+                 selectInput('plot_extras', 'Facet Row', c(None='.',"RTF_Window", "Labels"), multiple = TRUE, selected = "."
           )),
           column(5,
                  verbatimTextOutput(outputId = "info",placeholder = TRUE)
@@ -112,6 +112,14 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
           g <- g + ylim(c(input$mz[1],input$mz[2]))
         }
 
+        #adding labels to each point
+        if(input$plot_extras == "Labels"){
+          g <- g +
+            geom_text(aes(x = peakgroup_rt, y = LOBdbase_mz,
+                          label = (paste0(str_extract(FA_total_no_C, "\\d+"), ":", str_extract(FA_total_no_DB, "\\d+"))),
+                          hjust = 1, vjust = 2, color = Flag))
+        }
+
         # Add colors for carbon number
         if(input$color=="Carbon"){
           g <- g + geom_point(aes(color=as.character(FA_total_no_C))) +
@@ -139,11 +147,12 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
             scale_color_manual(values = c("#00FF00", "#545454","#E8DA1E","#FF3030", "#0000FF"))
         }
 
-        # if(input$plot_extras == "RTF_Window"){
-        #   DNPPE_rt <- LOBpeaklist[LOBpeaklist$compound_name=="DNPPE","peakgroup_rt"]
-        #   g <- g + geom_point(aes(x =DBase_DNPPE_RF,y = LOBdbase_mz))
-        #   #+ geom_errorbarh(aes(xmax = as.numeric(DNPPE_rt*DNPPE_Factor*1.1), xmin = as.numeric(DNPPE_rt*DNPPE_Factor*0.9), color=as.character(Flag)))
-        # }
+        if(input$plot_extras == "RTF_Window"){
+          g <- g +
+            geom_point(aes(x = peakgroup_rt/DNPPE_Factor*DBase_DNPPE_RF, y = LOBdbase_mz, color =  as.character(Flag)), shape = 3)+
+            geom_errorbarh(aes(xmax = peakgroup_rt/DNPPE_Factor*DBase_DNPPE_RF*1.1, xmin = peakgroup_rt/DNPPE_Factor*DBase_DNPPE_RF*0.9, height = 0.2, y = LOBdbase_mz, color = as.character(Flag)))
+        }
+
 
         # Add colors for classes
         if(input$color=="Lipid Class"){
