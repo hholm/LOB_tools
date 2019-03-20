@@ -141,8 +141,26 @@ cat("\n")
     cat("Comparing database RtFs to data.","Compound",i,"of",length(Known_RtFs$compound_name),"...")
 
     }
-cat("Done!")
+  cat("Done!")
 
+  # check for possible double peaks
+  Green_Flags <- Known_RtFs %>% filter(Flag == "ms2v" | Flag == "5%_rtv" | Flag == "10%_rtv")
+  split_by_compound_name <- split(Green_Flags,
+                                  duplicated(Green_Flags$compound_name)|duplicated(Green_Flags$compound_name, fromLast = TRUE))
+  Multiple_Flags <- split_by_compound_name[["TRUE"]]
+  Multiple_Flags$Flag <- rep("Double_Peak?", length(Multiple_Flags$compound_name))
+
+
+  cat("\n")
+  for (j in 1:length(Multiple_Flags$match_ID)){
+    match_row <- as.numeric(which(grepl(paste0("^", Multiple_Flags$match_ID[j], "$"), Known_RtFs$match_ID)))
+    Known_RtFs$Flag[match_row] = as.character(Multiple_Flags$Flag[j])
+
+    cat("\r")
+    flush.console()
+    cat("Flagging possible multiple peaks.","Compound",j,"of",length(Multiple_Flags$match_ID),"...")
+  }
+  cat("Done!")
 
   # combine known and unknown dfs
   Combined <- rbind(Known_RtFs, Unknown_RtFs)
@@ -165,7 +183,7 @@ cat("Done!")
   }
 cat("Done!")
 
-  Flagged_Data$Flag = factor(Flagged_Data$Flag, levels = c("Red", "ms2v", "5%_rtv", "10%_rtv", "Unknown"))
+  Flagged_Data$Flag = factor(Flagged_Data$Flag, levels = c("Red", "ms2v", "5%_rtv", "10%_rtv", "Double_Peak?", "Unknown"))
   Flagged_Data$DBase_DNPPE_RF <- as.numeric(Flagged_Data$DBase_DNPPE_RF)
 
 
