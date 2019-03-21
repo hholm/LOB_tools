@@ -1,14 +1,14 @@
 LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
-
+  
   #Make sure we have our librarys loaded
   library(shiny)
   library(tidyverse)
   library(RColorBrewer)
-
+  
   #Rename our peak list so we can modify it and keep the complete one
   run <- LOBpeaklist
-
-
+  
+  
   # Set up our large color pallete
   palette <-c("#E41A1C","#377EB8","#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33", "#A65628", "#F781BF",
               "#999999", "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33", "#A65628",
@@ -23,15 +23,15 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
               "#999999", "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33", "#A65628",
               "#F781BF", "#999999", "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33",
               "#A65628", "#F781BF", "#999999")
-
+  
   # Define the app
   app=shinyApp(
-
+    
     ui = fluidPage(
-
+      
       title = "Lipid Data Viewer",
-
-
+      
+      
       tabsetPanel(
         tabPanel(
           plotOutput('plot',height = "700px",click = "plot_click"),
@@ -51,7 +51,7 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
                              max=ceiling(max(run$LOBdbase_mz)),
                              value = c(floor(min(run$LOBdbase_mz)),ceiling(max(run$LOBdbase_mz))),
                              step=10, round=1),
-
+                 
                  checkboxInput('text', 'Display Names'),
                  checkboxInput('oxy', 'Toggle Oxidized Compounds ')
           ),
@@ -59,11 +59,11 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
                  selectInput('class', 'Select Lipid Class', c("All", as.character(unique(run$species))), multiple = TRUE, selected = "All"),
                  selectInput('color', 'Point Color', c('None','Carbon','Double Bonds','lpSolve Fitted', 'RF_Window', 'Lipid Class')),
                  selectInput('plot_extras', 'Facet Row', c(None='.',"RTF_Window", "Labels"), multiple = TRUE, selected = "."
-          )),
+                 )),
           column(5,
                  verbatimTextOutput(outputId = "info",placeholder = TRUE)
-                 )),
-
+          )),
+        
         tabPanel(
           plotOutput('bar'),
           title = "Distributions",
@@ -74,44 +74,44 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
           ),
           column(4,
                  selectInput('flag', "Flag?", c("All", as.character(unique(run$Flag))), multiple = TRUE, selected = "All"))
-
+          
         )
       )
     ),
-
-
+    
+    
     # Define server logic to draw our plot
     server = function(input, output) {
-
+      
       # Will update as varibles change
       output$plot <- renderPlot({
-
+        
         data <- run #so we dont change our intial data
-
+        
         # To plot all data
         if("All"%in%input$class!=TRUE){
           data <- data[data$species==input$class,]
         }
-
+        
         # To elimate oxy compounds if desired
         if(input$oxy){
           data <- data[data$degree_oxidation=="0",]
         }
-
+        
         # Construct inital plot with limits and points
         g <- ggplot(data = data,mapping = aes(x = peakgroup_rt, y = LOBdbase_mz)) +
           geom_point(size=3) +
           xlab("Retention Time (sec)") +
           ylab("m/z")
-
+        
         if(input$x_auto==FALSE){
-        g <- g + xlim(c(input$rt[1],input$rt[2]))
+          g <- g + xlim(c(input$rt[1],input$rt[2]))
         }
-
+        
         if(input$y_auto==FALSE){
           g <- g + ylim(c(input$mz[1],input$mz[2]))
         }
-
+        
         #adding labels to each point
         if(input$plot_extras == "Labels"){
           g <- g +
@@ -119,52 +119,52 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
                           label = (paste0(str_extract(FA_total_no_C, "\\d+"), ":", str_extract(FA_total_no_DB, "\\d+"))),
                           hjust = 1, vjust = 2, color = Flag))
         }
-
+        
         # Add colors for carbon number
         if(input$color=="Carbon"){
           g <- g + geom_point(aes(color=as.character(FA_total_no_C))) +
             scale_color_manual(values = palette)
-
+          
         }
-
+        
         # Add color for DB number
         if(input$color=="Double Bonds"){
           g <- g + geom_point(aes(color=as.character(FA_total_no_DB)),size=3) +
             scale_color_manual(values = palette)
         }
-
-
-
+        
+        
+        
         # Add colors for lpSolve solutions
         if(input$color=="lpSolve Fitted"){
           g <- g + geom_point(aes(color=as.character(lpSolve)),size=3) +
             scale_color_manual(values = c("#E8DA1E","#FF3030","#B6EEA6"))
         }
-
+        
         if(input$color=="RF_Window"){
           g <- g +
             geom_point(aes(color=as.character(Flag)),size=3) +
             scale_color_manual(values = c("#00FF00", "#545454","#E8DA1E","#FF3030", "#0000FF"))
         }
-
+        
         if(input$plot_extras == "RTF_Window"){
           g <- g +
             geom_point(aes(x = peakgroup_rt/DNPPE_Factor*DBase_DNPPE_RF, y = LOBdbase_mz, color =  as.character(Flag)), shape = 3)+
             geom_errorbarh(aes(xmax = peakgroup_rt/DNPPE_Factor*DBase_DNPPE_RF*1.1, xmin = peakgroup_rt/DNPPE_Factor*DBase_DNPPE_RF*0.9, height = 0.2, y = LOBdbase_mz, color = as.character(Flag)))
         }
-
-
+        
+        
         # Add colors for classes
         if(input$color=="Lipid Class"){
           g <- g + geom_point(aes(color=as.character(species)),size=3) +
             scale_color_manual(values = palette)
         }
-
+        
         # Add compound names
         if (input$text){
           g <- g + geom_text(aes(label=compound_name),hjust=1,vjust=2,size=3)
         }
-
+        
         output$info <- renderPrint({
           # With ggplot2, no need to tell it what the x and y variables are.
           # threshold: set max distance, in pixels
@@ -173,13 +173,13 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
           nearPoints(data, input$plot_click, threshold = 20, maxpoints = 1,
                      addDist = TRUE)
         })
-
+        
         g
-
+        
       })
-
-
-
+      
+      
+      
       output$bar <- renderPlot({
         tidy_run <- run %>%
           gather(key = Sample_ID,
@@ -190,21 +190,21 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
         tidy_data <- tidy_run %>%
           filter(is.na(FA_total_no_C) != TRUE)
         tidy_subset <- tidy_data[tidy_data$species==input$species,]
-
+        
         # further subset for specific flags
         if(input$flag != "All"){
           tidy_subset <- tidy_subset[tidy_subset$Flag == as.character(input$flag),]
         }
-
+        
         # if("All"%in%input$species!=TRUE){
         #   tidy_data <- tidy_data[tidy_data$species==input$species,]
         # }
-
+        
         # To elimate oxy compounds if desired
         # if(input$oxy){
         #   tidy_data <- tidy_data[tidy_data$degree_oxidation=="0",]
         # }
-
+        
         # Construct inital plot with limits and points
         b <- ggplot(data = tidy_subset, aes(x = FA_total_no_C,y = Peak_Size))+
           geom_bar(stat = "identity", position = "stack") +
@@ -215,16 +215,16 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
             axis.text.x = element_blank(),
             axis.text.y = element_blank(),
             axis.ticks = element_blank())
-
+        
         if(input$xaxis=="Carbon"){
           b <- ggplot(data = tidy_subset, aes(FA_total_no_C,y = Peak_Size)) +
             geom_bar(stat = "identity", position = "stack") +
             scale_color_manual(values = palette)+
             xlab(paste(input$xaxis)) +
             ylab("Peak Size")# Add colors for carbon number
-
+          
         }
-
+        
         # Add color for DB number
         if(input$xaxis=="Double Bonds"){
           b <- ggplot(data = tidy_subset, aes(FA_total_no_DB, y = Peak_Size)) +
@@ -233,20 +233,19 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
             xlab(paste(input$xaxis)) +
             ylab("Peak Size")# Add colors for carbon number
         }
-
+        
         # Add colors
         if(input$fill_colors=="Double Bonds"){
           b <- b + geom_point(aes(fill=FA_total_no_DB)) +
             scale_color_manual(values = palette)
         }
-
-
-
+        
+        
+        
         print(b)
-
+        
       })
     }
   )
   runApp(app)
 }
-
