@@ -208,6 +208,7 @@ cat("Done!")
 
       print(ggplot(data = Lipid)+
               geom_point(aes(x = peakgroup_rt, y = LOBdbase_mz, color =  Flag, size = 0.05))+
+              scale_color_manual(values=c("Red" = "#e55934","ms2v"="#fdbd4c","5%_rtv"="#9bc53d","10%_rtv"="#0f5f20","Double_Peak?"="#5bc0eb","Unknown"="#ff99ff")) +
               geom_point(aes(x = DBase_DNPPE_RF*DNPPE_RT, y = LOBdbase_mz, color =  Flag), shape = 3)+
               geom_errorbarh(aes(xmax = DBase_DNPPE_RF*DNPPE_RT*1.1, xmin = DBase_DNPPE_RF*DNPPE_RT*0.9, height = 0.2, y = LOBdbase_mz, color = Flag))+
               geom_text(aes(x = peakgroup_rt, y = LOBdbase_mz, label = C_DB, hjust = 1, vjust = 2, color = Flag))+
