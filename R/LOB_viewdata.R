@@ -90,7 +90,7 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
 
         # To plot all data
         if("All"%in%input$class!=TRUE){
-          data <- data[data$species==input$class,]
+          data <- data[which(data$species %in% input$class),]
         }
 
         # To elimate oxy compounds if desired
