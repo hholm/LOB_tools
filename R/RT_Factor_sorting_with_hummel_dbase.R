@@ -3,6 +3,10 @@
 # Feb. 20, 2019
 # input a raw lobset
 
+# Load data and RT Factor database
+original_data <- read.csv("Edited_NoHQCs_PosAndNeg_KimT_LOBSTAHS_screened_peakdata_2019-02-26T10-58-14_AM-0500.csv")
+RT_Factor_Dbase <-read.csv("C:/Users/TSQ/Desktop/Daniel Lowenstein/Older_Projects/RT_Factors/Hummel RtF Master Database - rtf_data.csv")
+
 RT_Factor_Sort <- function(original_data, RT_Factor_Dbase, choose_class = FALSE, plot_data = FALSE, save_plots = FALSE, data_title){
 
   library(tidyverse)
