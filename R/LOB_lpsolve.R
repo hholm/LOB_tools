@@ -1,6 +1,6 @@
 # LOB_lpsolve
 
-LOB_lpsolve <- function(LOBpeaklist,choose_class=NULL,save.files=FALSE,use_ms2=FALSE) {
+LOB_lpsolve <- function(LOBpeaklist,choose_class=NULL,save.files=FALSE,use_ms2=FALSE,plot_data = FALSE) {
 
   library(lpSolve)
   library(ggplot2)
@@ -270,7 +270,7 @@ for (k in 1:length(unique(LOBpeaklist$species))) {
     if (use_ms2 == TRUE){
       if(any(PRErun$Flag %in% "5%_rtv" | PRErun$Flag %in% "ms2v")){
         Final_Switch <- TRUE
-        cat("\nPerforming Prescreen of MS2 data for use later for",unique(LOBpeaklist$species)[k])
+        cat("\nPerforming Prescreen of MS2 data for use later for",as.character(unique(LOBpeaklist$species)[k]))
 
         #find ms2v and %5v points from the data set
         ms2v <- PRErun[which(PRErun$Flag == "ms2v"),]
@@ -280,7 +280,10 @@ for (k in 1:length(unique(LOBpeaklist$species))) {
         #Screen for points within that that dont fit and plot the results
         ms2v_screened <- screen(ms2v)
         ms2v_screened_noNA <- ms2v_screened[which(is.na(ms2v_screened$lpSolve)==FALSE & ms2v_screened$species == unique(LOBpeaklist$species)[k]),]
+
+        if(plot_data == TRUE){
         showplots(ms2v_screened_noNA,extra = "RtF Confirmed Only")
+          }
 
         #Take only the yes points
         use2screen <- ms2v_screened_noNA[ms2v_screened_noNA$lpSolve == "Yes",]
@@ -343,20 +346,25 @@ for (k in 1:length(unique(LOBpeaklist$species))) {
         cat("\n")
         ms2_excluded_matchids <- PRErun[PRErun$match_ID %in% final_cut,"match_ID"]
         PRErun <- PRErun[!(PRErun$match_ID %in% final_cut),]
-      }
+
     }else{
-      cat("\nNo points within 5% of a retention time window.")
+      cat("\nNo points within 5% of a retention time window. Moving to next class")
+      next()
     }
+  }
 
 
   #Screen everything
-  cat("\nPerforming screening of complete dataset for",unique(LOBpeaklist$species)[k])
+  cat("\nPerforming screening of complete dataset for",as.character(unique(LOBpeaklist$species)[k]))
   screened <- screen(PRErun)
   if(Final_Switch==TRUE){
     screened[screened$match_ID %in% ms2_excluded_matchids,"lpSolve"] <- "No"
   }
   screened_plot <- screened[which(is.na(screened$lpSolve)==FALSE & screened$species == unique(LOBpeaklist$species)[k]),]
+
+  if(plot_data==TRUE){
   showplots(screened_plot,extra = "Final")
+  }
 
   # if (save.files==TRUE){
   #   ggsave(filename = paste0(as.character(run$species), "_LP_solve.tiff"),

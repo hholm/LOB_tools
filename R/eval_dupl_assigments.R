@@ -42,8 +42,6 @@ eval_dupls <- function(flagged_set){
   }
   cat("Done! (Warnings indicate there were multiple 'TRUE' hits when looking for duplicates.")
 
-
-
   for (m in 1:length(unique_peakgroups$match_ID)){
       if(grepl("ms2v|5%_rtv|10%_rtv|Double_Peak?", unique_peakgroups$Flag[m]) == TRUE){
         unique_peakgroups$code[m] <- "RTF_Confirmed"
@@ -83,6 +81,18 @@ eval_dupls <- function(flagged_set){
     cat("Recombining unique peakgroups.","Compound",j,"of",length(unique_peakgroups$match_ID),"...")
   }
   cat("Done!")
+
+  #Adding a column to indicate whether isomers have been resolved
+  # flagged_set$resolved <- rep(NA,length(flagged_set$code))
+  # i <- NULL
+  # for (i in 1:length(unique(flagged_set$xcms_peakgroup))) {
+  #   run <- flagged_set[which(flagged_set$xcms_peakgroup == unique(flagged_set$xcms_peakgroup)[i]),]
+  #   if(nrow(run)=1){
+  #     flagged_set[which(flagged_set$xcms_peakgroup == unique(flagged_set$xcms_peakgroup)[i]),"resolved"] <- TRUE
+  #   }else{
+  #     if("run$code")
+  #   }
+  # }
 
   return(flagged_set)
 }
