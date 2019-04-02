@@ -3,7 +3,6 @@
 LOB_lpsolve <- function(LOBpeaklist,choose_class=NULL,save.files=FALSE,use_ms2=FALSE,plot_data = FALSE) {
 
   library(lpSolve)
-  library(ggplot2)
 
   ### Check Inputs ###
 
@@ -187,7 +186,9 @@ LOB_lpsolve <- function(LOBpeaklist,choose_class=NULL,save.files=FALSE,use_ms2=F
 
 
         cat("\nApplying lpSolve algorythm...")
-        sol <- lpSolve::lp("max", Binary_String, Final_Exclusion_Matrix, dir, rhs,all.bin = TRUE,num.bin.solns = 100)
+        gc()
+        sol <- lp("max", Binary_String, Final_Exclusion_Matrix, dir, rhs,all.bin = TRUE,num.bin.solns = 100)
+        gc()
         cat(" Done")
         numcols <- nrow(run)
         numsols <- sol$num.bin.solns
