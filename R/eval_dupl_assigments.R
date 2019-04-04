@@ -56,13 +56,13 @@ eval_dupls <- function(flagged_set){
 
   for (m in 1:length(unique_peakgroups$match_ID)){
     if(grepl("Red", unique_peakgroups$Flag[m]) == TRUE){
-      unique_peakgroups$code[m] <- "False_Assignment"
+      unique_peakgroups$code[m] <- "RTF_Failure"
     }
   }
 
   for (m in 1:length(unique_peakgroups$match_ID)){
     if(grepl("Unknown", unique_peakgroups$Flag[m]) == TRUE & grepl("No", unique_peakgroups$lpSolve[m]) == TRUE){
-      unique_peakgroups$code[m] <- "False_Assignment"
+      unique_peakgroups$code[m] <- "LP_Solve_Failure"
     }
   }
 
