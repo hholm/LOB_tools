@@ -119,7 +119,7 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
           g <- g +
             geom_text(aes(x = peakgroup_rt, y = LOBdbase_mz,
                           label = (paste0(str_extract(FA_total_no_C, "\\d+"), ":", str_extract(FA_total_no_DB, "\\d+"))),
-                          hjust = 1, vjust = 2, color = Flag))
+                          hjust = 1, vjust = 2))
         }}
 
         # Add colors for carbon number
