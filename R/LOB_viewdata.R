@@ -57,8 +57,9 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
           ),
           column(4,
                  selectInput('class', 'Select Lipid Class', c("All", as.character(unique(run$species))), multiple = TRUE, selected = "All"),
-                 selectInput('color', 'Point Color', c('None','Carbon','Double Bonds','lpSolve Fitted', 'RF_Window', 'Lipid Class','Final Code')),
-                 selectInput('plot_extras', 'Plot Extras', c("RTF_Window", "Labels"), multiple = TRUE
+                 selectInput('color', 'Point Color', c('None','Carbon','Double Bonds','Species', 'Lipid Class', 'lpSolve Fitted', 'RF_Window', 'Lipid Class','Final Code')),
+                 selectInput('plot_extras', 'Plot Extras', c("RTF_Window", "Labels"), multiple = TRUE),
+                 selectInput('sizebysample', 'Size by Sample', c("None", colnames(run[13:(length(run)-29)])), multiple = FALSE, selected = "None"
                  )),
           column(5,
                 tableOutput(outputId = "info")
@@ -100,7 +101,7 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
 
         # Construct inital plot with limits and points
         g <- ggplot(data = data,mapping = aes(x = peakgroup_rt, y = LOBdbase_mz)) +
-          geom_point(size=3) +
+          geom_point(aes(size=2)) +
           xlab("Retention Time (sec)") +
           ylab("m/z")
 
@@ -118,7 +119,7 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
           g <- g +
             geom_text(aes(x = peakgroup_rt, y = LOBdbase_mz,
                           label = (paste0(str_extract(FA_total_no_C, "\\d+"), ":", str_extract(FA_total_no_DB, "\\d+"))),
-                          hjust = 1, vjust = 2, color = Flag))
+                          hjust = 1, vjust = 2))
         }}
 
         # Add colors for carbon number
@@ -134,10 +135,22 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
             scale_color_manual(values = palette)
         }
 
+        # Add color for species
+        if(input$color=="Species"){
+          g <- g + geom_point(aes(color=species),size=3) +
+            scale_color_manual(values = palette)
+        }
+
+        # Add color for lipid class
+        if(input$color=="Lipid Class"){
+          g <- g + geom_point(aes(color=lipid_class),size=3) +
+            scale_color_manual(values = palette)
+        }
+
         #Add color for final code
         if(input$color=="Final Code"){
           g <- g + geom_point(aes(color=as.character(code)),size=3) +
-            scale_color_manual(values = c("LP_Solve_Confirmed"="#00ddff",'False_Assignment'="#FF3030",'RTF_Confirmed'="#2aff00","Maybe"="#ff9e44","Unknown"="#000000"))
+            scale_color_manual(values = c("LP_Solve_Confirmed"="#66CD00",'False_Assignment'="#FF3030",'RTF_Confirmed'="#2aff00","Maybe"="#ff9e44","Unknown"="#000000", "LP_Solve_Failure"="#B22222", "RTF_Failure"="#8B1A1A"))
         }
 
         # Add colors for lpSolve solutions
@@ -149,7 +162,7 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
         if(input$color=="RF_Window"){
           g <- g +
             geom_point(aes(color=as.character(Flag)),size=3) +
-            scale_color_manual(values = c("#00FF00", "#545454","#E8DA1E","#FF3030", "#0000FF","#000000"))
+            scale_color_manual(values = c("#00FF00", "#B6EEA6","#E8DA1E","#FF3030", "#0000FF","#000000"))
         }
 
         if(!is.null(input$plot_extras)){
@@ -169,6 +182,13 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
         # Add compound names
         if (input$text){
           g <- g + geom_text(aes(label=compound_name),hjust=1,vjust=2,size=3)
+        }
+
+        # change point size by sample
+        if (input$sizebysample != "None"){
+          g <- g +
+            geom_point(data = data, mapping =  aes(x = peakgroup_rt, y = LOBdbase_mz))+
+            geom_point(aes(size = !!as.symbol(input$sizebysample)))
         }
 
         output$info <- renderTable({

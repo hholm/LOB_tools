@@ -2,7 +2,8 @@
 
 LOB_lpsolve <- function(LOBpeaklist,choose_class=NULL,save.files=FALSE,use_ms2=FALSE,plot_data = FALSE) {
 
-  #library(lpSolve)
+
+  library(lpSolve)
 
 
   ### Check Inputs ###
