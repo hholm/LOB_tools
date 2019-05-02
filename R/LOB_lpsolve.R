@@ -2,7 +2,9 @@
 
 LOB_lpsolve <- function(LOBpeaklist,choose_class=NULL,save.files=FALSE,use_ms2=FALSE,plot_data = FALSE) {
 
+
   library(lpSolve)
+
 
   ### Check Inputs ###
 
@@ -209,7 +211,9 @@ LOB_lpsolve <- function(LOBpeaklist,choose_class=NULL,save.files=FALSE,use_ms2=F
   ### Format our input in a 'run' dataframe
 
   done <- LOBpeaklist
+
   done$lpSolve <- rep(NA,length(done$match_ID))
+
   LOBpeaklist <- LOBpeaklist[which(LOBpeaklist$degree_oxidation==0),]
 
   if (is.null(choose_class)==FALSE) {
