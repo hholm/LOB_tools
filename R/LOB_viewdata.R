@@ -53,11 +53,13 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
                              step=10, round=1),
 
                  checkboxInput('text', 'Display Names'),
-                 checkboxInput('oxy', 'Toggle Oxidized Compounds ')
+                 checkboxInput('oxy', 'Toggle Oxidized Compounds '),
+                 checkboxInput('false', 'Toggle False Assignments ')
           ),
           column(4,
                  selectInput('class', 'Select Lipid Class', c("All", as.character(unique(run$species))), multiple = TRUE, selected = "All"),
                  selectInput('color', 'Point Color', c('None','Carbon','Double Bonds','Species', 'Lipid Class', 'lpSolve Fitted', 'RF_Window', 'Lipid Class','Final Code')),
+                 selectInput('total_carbon', 'Acyl Carbon', c('All',as.character(unique(run$FA_total_no_C))), multiple = TRUE, selected = "All"),
                  selectInput('plot_extras', 'Plot Extras', c("RTF_Window", "Labels"), multiple = TRUE),
                  selectInput('sizebysample', 'Size by Sample', c("None", colnames(run[13:(length(run)-29)])), multiple = FALSE, selected = "None"
                  )),
@@ -97,6 +99,11 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
         # To elimate oxy compounds if desired
         if(input$oxy){
           data <- data[data$degree_oxidation=="0",]
+        }
+
+        # To elimate false assignments if desired
+        if(input$false){
+          data <- data[data$code!="False_Assignment",]
         }
 
         # Construct inital plot with limits and points
@@ -150,7 +157,7 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
         #Add color for final code
         if(input$color=="Final Code"){
           g <- g + geom_point(aes(color=as.character(code)),size=3) +
-            scale_color_manual(values = c("LP_Solve_Confirmed"="#66CD00",'False_Assignment'="#FF3030",'RTF_Confirmed'="#2aff00","Maybe"="#ff9e44","Unknown"="#000000", "LP_Solve_Failure"="#B22222", "RTF_Failure"="#8B1A1A"))
+            scale_color_manual(values = c("LP_Solve_Confirmed"="#66CD00", "10%_rtv"="#66CD00","False_Assignment"="#FF3030", "Red"="#FF3030","RTF_Confirmed"="#2aff00", "ms2v"="#2aff00", "5%_rtv"="#2aff00","LP_Solve_Maybe"="#ff9e44", "Double_Peak?"="#ff9e44", "Double Check"="#ff9e44","Unknown"="#000000", "LP_Solve_Failure"="#B22222", "RTF_Failure"="#B22222"))
         }
 
         # Add colors for lpSolve solutions
@@ -163,6 +170,10 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
           g <- g +
             geom_point(aes(color=as.character(Flag)),size=3) +
             scale_color_manual(values = c("#00FF00", "#B6EEA6","#E8DA1E","#FF3030", "#0000FF","#000000"))
+        }
+
+        if("All" %in% input$total_carbon != TRUE){
+          data <- data[which(data$FA_total_no_C %in% input$total_carbon),]
         }
 
         if(!is.null(input$plot_extras)){
@@ -188,7 +199,8 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
         if (input$sizebysample != "None"){
           g <- g +
             geom_point(data = data, mapping =  aes(x = peakgroup_rt, y = LOBdbase_mz))+
-            geom_point(aes(size = !!as.symbol(input$sizebysample)))
+            geom_point(aes(color = as.character(code), size = !!as.symbol(input$sizebysample)))+
+            scale_color_manual(values = c("LP_Solve_Confirmed"="#66CD00", "10%_rtv"="#66CD00","False_Assignment"="#FF3030", "Red"="#FF3030","RTF_Confirmed"="#2aff00", "ms2v"="#2aff00", "5%_rtv"="#2aff00","LP_Solve_Maybe"="#ff9e44", "Double_Peak?"="#ff9e44", "Double Check"="#ff9e44","Unknown"="#000000", "LP_Solve_Failure"="#B22222", "RTF_Failure"="#B22222"))
         }
 
         output$info <- renderTable({

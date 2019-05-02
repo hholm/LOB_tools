@@ -11,8 +11,7 @@ eval_dupls <- function(flagged_set){
 
   # split duplicate assignments by whether they've been identified by retention time factor
   separated_duplicates <- split(duplicate_peakgroups, duplicate_peakgroups$Flag == "ms2v" |
-                       duplicate_peakgroups$Flag == "5%_rtv" |
-                       duplicate_peakgroups$Flag == "10%_rtv")
+                       duplicate_peakgroups$Flag == "5%_rtv" )
 
   # separate
   confirmed <- separated_duplicates[["TRUE"]]
@@ -27,9 +26,12 @@ eval_dupls <- function(flagged_set){
   # split the ones that are still duplicated into a potential isomer list
   double_positives <- split(confirmed, duplicated(confirmed$xcms_peakgroup) | duplicated(confirmed$xcms_peakgroup, fromLast = TRUE))[["TRUE"]]
   double_positives$code <- rep("Probable Isomer")
+
+  # get all of the xcms peakgroups for the confident rtf confirmations
   peakgroup_list <- as.data.frame(confirmed$xcms_peakgroup)
 
-
+  # for each of the "unlikely" peaks, if you find an xcms peakgroup match in the rtf confirmed peakgroup list,
+  # you can confidently say if was a "false assignment"
   cat("\n")
   for (i in 1:length(unlikely$match_ID)){
     if(grepl(unlikely$xcms_peakgroup[i], peakgroup_list) == TRUE){
@@ -42,10 +44,17 @@ eval_dupls <- function(flagged_set){
   }
   cat("Done! (Warnings indicate there were multiple 'TRUE' hits when looking for duplicates.")
 
+  # assigning final codes
   for (m in 1:length(unique_peakgroups$match_ID)){
-      if(grepl("ms2v|5%_rtv|10%_rtv|Double_Peak?", unique_peakgroups$Flag[m]) == TRUE){
+      if(grepl("ms2v|5%_rtv", unique_peakgroups$Flag[m]) == TRUE){
         unique_peakgroups$code[m] <- "RTF_Confirmed"
       }
+  }
+
+  for (m in 1:length(unique_peakgroups$match_ID)){
+    if(grepl("10%_rtv|Double_Peak?", unique_peakgroups$Flag[m]) == TRUE){
+      unique_peakgroups$code[m] <- "Double Check"
+    }
   }
 
   for (m in 1:length(unique_peakgroups$match_ID)){
@@ -68,7 +77,7 @@ eval_dupls <- function(flagged_set){
 
   for (m in 1:length(unique_peakgroups$match_ID)){
     if(grepl("Unknown", unique_peakgroups$Flag[m]) == TRUE & grepl("Maybe", unique_peakgroups$lpSolve[m]) == TRUE){
-      unique_peakgroups$code[m] <- "Maybe"
+      unique_peakgroups$code[m] <- "LP_Solve_Maybe"
     }
   }
 
