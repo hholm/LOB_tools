@@ -34,7 +34,7 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
 
       tabsetPanel(
         tabPanel(
-          plotOutput('plot',height = "700px",click = "plot_click"),
+          plotOutput('plot',height = "525px",click = "plot_click"),
           title = "M/Z vs RT",
           br(),
           column(3,
@@ -58,11 +58,11 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
           ),
           column(4,
                  selectInput('class', 'Select Lipid Class', c("All", as.character(unique(run$species))), multiple = TRUE, selected = "All"),
-                 selectInput('color', 'Point Color', c('None','Carbon','Double Bonds','Species', 'Lipid Class', 'lpSolve Fitted', 'RF_Window', 'Lipid Class','Final Code')),
-                 selectInput('total_carbon', 'Acyl Carbon', c('All',as.character(unique(run$FA_total_no_C))), multiple = TRUE, selected = "All"),
-                 selectInput('plot_extras', 'Plot Extras', c("RTF_Window", "Labels"), multiple = TRUE),
+                 selectInput('color', 'Point Color', c('None','Carbon','Double Bonds', 'Degree Oxidation','Species', 'Lipid Class', 'lpSolve Fitted', 'RF_Window', 'Lipid Class','Final Code')),
+                 selectInput('total_carbon', 'Acyl Carbon', c('All',unique(run$FA_total_no_C)), multiple = TRUE, selected = "All"),
                  selectInput('sizebysample', 'Size by Sample', c("None", colnames(run[13:(length(run)-29)])), multiple = FALSE, selected = "None"
-                 )),
+                 ),
+                 selectInput('plot_extras', 'Plot Extras', c("RTF_Window", "Labels", "Oxidized Labels"), multiple = TRUE)),
           column(5,
                 tableOutput(outputId = "info")
           )),
@@ -106,6 +106,11 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
           data <- data[data$code!="False_Assignment",]
         }
 
+        # only look at certain acyl lengths
+        if("All" %in% input$total_carbon != TRUE){
+          data <- data[as.numeric(data$FA_total_no_C) == as.numeric(input$total_carbon),]
+        }
+
         # Construct inital plot with limits and points
         g <- ggplot(data = data,mapping = aes(x = peakgroup_rt, y = LOBdbase_mz)) +
           geom_point(aes(size=2)) +
@@ -129,52 +134,65 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
                           hjust = 1, vjust = 2))
         }}
 
+        #adding oxidation labels to each point
+        if(!is.null(input$plot_extras)){
+          if("Oxidized Labels" %in% input$plot_extras){
+            g <- g +
+              geom_text(aes(x = peakgroup_rt, y = LOBdbase_mz,
+                            label = (paste0(str_extract(FA_total_no_C, "\\d+"), ":", str_extract(FA_total_no_DB, "\\d+"), ":", str_extract(degree_oxidation, "\\d+"))),
+                            hjust = 1, vjust = 2))
+          }}
+
         # Add colors for carbon number
         if(input$color=="Carbon"){
-          g <- g + geom_point(aes(color=as.character(FA_total_no_C))) +
+          g <- g + geom_point(aes(color=as.character(FA_total_no_C), fill = as.character(FA_total_no_C))) +
             scale_color_manual(values = palette)
 
         }
 
         # Add color for DB number
         if(input$color=="Double Bonds"){
-          g <- g + geom_point(aes(color=as.character(FA_total_no_DB)),size=3) +
+          g <- g + geom_point(aes(color=as.character(FA_total_no_DB), fill = as.character(FA_total_no_DB)),size=3) +
+            scale_color_manual(values = palette)
+        }
+
+        # Add color for degree oxidation
+        if(input$color=="Degree Oxidation"){
+          g <- g + geom_point(aes(color=as.character(degree_oxidation), fill = as.character(degree_oxidation)),size=3) +
             scale_color_manual(values = palette)
         }
 
         # Add color for species
         if(input$color=="Species"){
-          g <- g + geom_point(aes(color=species),size=3) +
+          g <- g + geom_point(aes(color=species, fill = species),size=3) +
             scale_color_manual(values = palette)
         }
 
         # Add color for lipid class
         if(input$color=="Lipid Class"){
-          g <- g + geom_point(aes(color=lipid_class),size=3) +
+          g <- g + geom_point(aes(color=lipid_class, fill = lipid_class),size=3) +
             scale_color_manual(values = palette)
         }
 
         #Add color for final code
         if(input$color=="Final Code"){
-          g <- g + geom_point(aes(color=as.character(code)),size=3) +
-            scale_color_manual(values = c("LP_Solve_Confirmed"="#66CD00", "10%_rtv"="#66CD00","False_Assignment"="#FF3030", "Red"="#FF3030","RTF_Confirmed"="#2aff00", "ms2v"="#2aff00", "5%_rtv"="#2aff00","LP_Solve_Maybe"="#ff9e44", "Double_Peak?"="#ff9e44", "Double Check"="#ff9e44","Unknown"="#000000", "LP_Solve_Failure"="#B22222", "RTF_Failure"="#B22222"))
+          g <- g + geom_point(aes(color=as.character(code), fill = as.character(code)),size=3) +
+            scale_color_manual(values = c("LP_Solve_Confirmed"="#66CD00", "10%_rtv"="#66CD00","False_Assignment"="#FF3030", "Red"="#FF3030","RTF_Confirmed"="#2aff00", "ms2v"="#0000FF", "5%_rtv"="#2aff00","LP_Solve_Maybe"="#ff9e44", "Double_Peak?"="#ff9e44", "Double Check"="#ff9e44","Unknown"="#000000", "LP_Solve_Failure"="#B22222", "RTF_Failure"="#B22222"))
         }
 
         # Add colors for lpSolve solutions
         if(input$color=="lpSolve Fitted"){
-          g <- g + geom_point(aes(color=as.character(lpSolve)),size=3) +
+          g <- g + geom_point(aes(color=as.character(lpSolve), fill = as.character(lpSolve)),size=3) +
             scale_color_manual(values = c("#E8DA1E","#FF3030","#B6EEA6"))
         }
 
         if(input$color=="RF_Window"){
           g <- g +
-            geom_point(aes(color=as.character(Flag)),size=3) +
-            scale_color_manual(values = c("#00FF00", "#B6EEA6","#E8DA1E","#FF3030", "#0000FF","#000000"))
+            geom_point(aes(color=as.character(Flag), fill = as.character(Flag)),size=3) +
+            scale_color_manual(values = c("LP_Solve_Confirmed"="#66CD00", "10%_rtv"="#66CD00","False_Assignment"="#FF3030", "Red"="#FF3030","RTF_Confirmed"="#2aff00", "ms2v"="#0000FF", "5%_rtv"="#2aff00","LP_Solve_Maybe"="#ff9e44", "Double_Peak?"="#ff9e44", "Double Check"="#ff9e44","Unknown"="#000000", "LP_Solve_Failure"="#B22222", "RTF_Failure"="#B22222"))
         }
 
-        if("All" %in% input$total_carbon != TRUE){
-          data <- data[which(data$FA_total_no_C %in% input$total_carbon),]
-        }
+
 
         if(!is.null(input$plot_extras)){
         if("RTF_Window" %in% input$plot_extras){
@@ -186,7 +204,7 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
 
         # Add colors for classes
         if(input$color=="Lipid Class"){
-          g <- g + geom_point(aes(color=as.character(species)),size=3) +
+          g <- g + geom_point(aes(color=as.character(species), fill = as.character(species)),size=3) +
             scale_color_manual(values = palette)
         }
 
@@ -199,8 +217,8 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
         if (input$sizebysample != "None"){
           g <- g +
             geom_point(data = data, mapping =  aes(x = peakgroup_rt, y = LOBdbase_mz))+
-            geom_point(aes(color = as.character(code), size = !!as.symbol(input$sizebysample)))+
-            scale_color_manual(values = c("LP_Solve_Confirmed"="#66CD00", "10%_rtv"="#66CD00","False_Assignment"="#FF3030", "Red"="#FF3030","RTF_Confirmed"="#2aff00", "ms2v"="#2aff00", "5%_rtv"="#2aff00","LP_Solve_Maybe"="#ff9e44", "Double_Peak?"="#ff9e44", "Double Check"="#ff9e44","Unknown"="#000000", "LP_Solve_Failure"="#B22222", "RTF_Failure"="#B22222"))
+            geom_point(aes(color = as.character(code), fill = as.character(code), size = !!as.symbol(input$sizebysample)))+
+            scale_color_manual(values = c("LP_Solve_Confirmed"="#66CD00", "10%_rtv"="#66CD00","False_Assignment"="#FF3030", "Red"="#FF3030","RTF_Confirmed"="#2aff00", "ms2v"="#0000FF", "5%_rtv"="#2aff00","LP_Solve_Maybe"="#ff9e44", "Double_Peak?"="#ff9e44", "Double Check"="#ff9e44","Unknown"="#000000", "LP_Solve_Failure"="#B22222", "RTF_Failure"="#B22222"))
         }
 
         output$info <- renderTable({

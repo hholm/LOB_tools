@@ -85,7 +85,8 @@ RT_Factor_Sort <- function(original_data, RT_Factor_Dbase, choose_class = FALSE,
     filter(degree_oxidation == "0",
            lipid_class == "IP_DAG"|
              lipid_class == "IP_MAG"|
-             lipid_class == "TAG"
+             lipid_class == "TAG"|
+             lipid_class == "FFA"
            )
 
   # if you're choosing a class
