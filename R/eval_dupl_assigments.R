@@ -42,7 +42,7 @@ eval_dupls <- function(flagged_set){
     flush.console()
     cat("Identifying duplicate assignments.","Compound",i,"of",length(unlikely$match_ID),"...")
   }
-  cat("Done! (Warnings indicate there were multiple 'TRUE' hits when looking for duplicates.")
+  cat("Done! (Warnings indicate there were multiple 'TRUE' hits when looking for duplicates.)")
 
   # assigning final codes
   for (m in 1:length(unique_peakgroups$match_ID)){

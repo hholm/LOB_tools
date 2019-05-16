@@ -56,14 +56,14 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
                  checkboxInput('oxy', 'Toggle Oxidized Compounds '),
                  checkboxInput('false', 'Toggle False Assignments ')
           ),
-          column(4,
+          column(3,
                  selectInput('class', 'Select Lipid Class', c("All", as.character(unique(run$species))), multiple = TRUE, selected = "All"),
                  selectInput('color', 'Point Color', c('None','Carbon','Double Bonds', 'Degree Oxidation','Species', 'Lipid Class', 'lpSolve Fitted', 'RF_Window', 'Lipid Class','Final Code')),
                  selectInput('total_carbon', 'Acyl Carbon', c('All',unique(run$FA_total_no_C)), multiple = TRUE, selected = "All"),
                  selectInput('sizebysample', 'Size by Sample', c("None", colnames(run[13:(length(run)-29)])), multiple = FALSE, selected = "None"
                  ),
                  selectInput('plot_extras', 'Plot Extras', c("RTF_Window", "Labels", "Oxidized Labels"), multiple = TRUE)),
-          column(5,
+          column(6,
                 tableOutput(outputId = "info")
           )),
 
@@ -113,7 +113,7 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
 
         # Construct inital plot with limits and points
         g <- ggplot(data = data,mapping = aes(x = peakgroup_rt, y = LOBdbase_mz)) +
-          geom_point(aes(size=2)) +
+          geom_point(aes(size=3)) +
           xlab("Retention Time (sec)") +
           ylab("m/z")
 
@@ -145,7 +145,7 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
 
         # Add colors for carbon number
         if(input$color=="Carbon"){
-          g <- g + geom_point(aes(color=as.character(FA_total_no_C), fill = as.character(FA_total_no_C))) +
+          g <- g + geom_point(aes(color=as.character(FA_total_no_C), fill = as.character(FA_total_no_C)), size =3) +
             scale_color_manual(values = palette)
 
         }
@@ -217,8 +217,7 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
         if (input$sizebysample != "None"){
           g <- g +
             geom_point(data = data, mapping =  aes(x = peakgroup_rt, y = LOBdbase_mz))+
-            geom_point(aes(color = as.character(code), fill = as.character(code), size = !!as.symbol(input$sizebysample)))+
-            scale_color_manual(values = c("LP_Solve_Confirmed"="#66CD00", "10%_rtv"="#66CD00","False_Assignment"="#FF3030", "Red"="#FF3030","RTF_Confirmed"="#2aff00", "ms2v"="#0000FF", "5%_rtv"="#2aff00","LP_Solve_Maybe"="#ff9e44", "Double_Peak?"="#ff9e44", "Double Check"="#ff9e44","Unknown"="#000000", "LP_Solve_Failure"="#B22222", "RTF_Failure"="#B22222"))
+            geom_point(aes(size = !!as.symbol(input$sizebysample)))
         }
 
         output$info <- renderTable({
@@ -228,8 +227,8 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
           # addDist: add column with distance, in pixels
           run_table <-nearPoints(data, input$plot_click, threshold = 20, maxpoints = 1,
                      addDist = TRUE)
-          run[which(run$xcms_peakgroup == run_table$xcms_peakgroup),c("xcms_peakgroup","compound_name","Flag","lpSolve","code")]
-        },)
+          run[which(run$xcms_peakgroup == run_table$xcms_peakgroup),c("xcms_peakgroup","compound_name", "LOBdbase_mz","Flag","lpSolve","code")]
+        }, digits = 5)
 
         g
 
