@@ -17,32 +17,33 @@ eval_dupls <- function(flagged_set){
   confirmed <- separated_duplicates[["TRUE"]]
   unlikely <- separated_duplicates[["FALSE"]]
 
-  #give a confirmed code
-  for (k in 1:length(confirmed$match_ID)){
-    confirmed_row <- as.numeric(which(grepl(paste0("^", confirmed$match_ID[k], "$"), flagged_set$match_ID)))
-    flagged_set$code[confirmed_row] <- "RTF_Confirmed"
+  if(length(confirmed) > 0){#give a confirmed code
+    for (k in 1:length(confirmed$match_ID)){
+      confirmed_row <- as.numeric(which(grepl(paste0("^", confirmed$match_ID[k], "$"), flagged_set$match_ID)))
+      flagged_set$code[confirmed_row] <- "RTF_Confirmed"
+    }
+
+    # split the ones that are still duplicated into a potential isomer list
+    double_positives <- split(confirmed, duplicated(confirmed$xcms_peakgroup) | duplicated(confirmed$xcms_peakgroup, fromLast = TRUE))[["TRUE"]]
+    double_positives$code <- rep("Probable Isomer")
+
+    # get all of the xcms peakgroups for the confident rtf confirmations
+    peakgroup_list <- as.data.frame(confirmed$xcms_peakgroup)
+
+    # for each of the "unlikely" peaks, if you find an xcms peakgroup match in the rtf confirmed peakgroup list,
+    # you can confidently say if was a "false assignment"
+    cat("\n")
+    for (i in 1:length(unlikely$match_ID)){
+      if(grepl(unlikely$xcms_peakgroup[i], peakgroup_list) == TRUE){
+        disconfirmed_row <- as.numeric(which(grepl(paste0("^", unlikely$match_ID[i], "$"), flagged_set$match_ID)))
+        flagged_set$code[disconfirmed_row] <- "False_Assignment"
+      }else{unique_peakgroups <- rbind(unique_peakgroups, unlikely[i, ])}
+      cat("\r")
+      flush.console()
+      cat("Identifying duplicate assignments.","Compound",i,"of",length(unlikely$match_ID),"...")
+    }
+    cat("Done! (Warnings indicate there were multiple 'TRUE' hits when looking for duplicates.)")
   }
-
-  # split the ones that are still duplicated into a potential isomer list
-  double_positives <- split(confirmed, duplicated(confirmed$xcms_peakgroup) | duplicated(confirmed$xcms_peakgroup, fromLast = TRUE))[["TRUE"]]
-  double_positives$code <- rep("Probable Isomer")
-
-  # get all of the xcms peakgroups for the confident rtf confirmations
-  peakgroup_list <- as.data.frame(confirmed$xcms_peakgroup)
-
-  # for each of the "unlikely" peaks, if you find an xcms peakgroup match in the rtf confirmed peakgroup list,
-  # you can confidently say if was a "false assignment"
-  cat("\n")
-  for (i in 1:length(unlikely$match_ID)){
-    if(grepl(unlikely$xcms_peakgroup[i], peakgroup_list) == TRUE){
-      disconfirmed_row <- as.numeric(which(grepl(paste0("^", unlikely$match_ID[i], "$"), flagged_set$match_ID)))
-      flagged_set$code[disconfirmed_row] <- "False_Assignment"
-    }else{unique_peakgroups <- rbind(unique_peakgroups, unlikely[i, ])}
-    cat("\r")
-    flush.console()
-    cat("Identifying duplicate assignments.","Compound",i,"of",length(unlikely$match_ID),"...")
-  }
-  cat("Done! (Warnings indicate there were multiple 'TRUE' hits when looking for duplicates.)")
 
   # assigning final codes
   for (m in 1:length(unique_peakgroups$match_ID)){
