@@ -8,7 +8,7 @@ library(tidyverse)
 
 #setwd("C:/Users/TSQ/Desktop/Daniel Lowenstein/GSL Tests/NAAMES/")
 
-data <- read.csv("NAAMES_First_Half_Coded.csv")
+#data <- read.csv("NAAMES_First_Half_Coded.csv")
 # get a random column and assign a new column with just
 # C number and DB number to label everything
 lipidclass <- data %>%
