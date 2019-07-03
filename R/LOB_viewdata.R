@@ -34,7 +34,7 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
 
       tabsetPanel(
         tabPanel(
-          plotOutput('plot',height = "525px",click = "plot_click"),
+          plotOutput('plot',height = "800px",click = "plot_click"),
           title = "M/Z vs RT",
           br(),
           column(3,
@@ -235,7 +235,7 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
           # addDist: add column with distance, in pixels
           run_table <-nearPoints(data, input$plot_click, threshold = 20, maxpoints = 1,
                      addDist = TRUE)
-          run[which(run$xcms_peakgroup == run_table$xcms_peakgroup),c("xcms_peakgroup","compound_name", "LOBdbase_mz","Flag","lpSolve","code")]
+          run[which(run$xcms_peakgroup == run_table$xcms_peakgroup),c("xcms_peakgroup","compound_name","LOBdbase_mz","peakgroup_rt","Flag","lpSolve","code")]
         }, digits = 5)
 
         g
