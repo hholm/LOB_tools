@@ -149,6 +149,13 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
                             hjust = 1, vjust = 2))
           }}
 
+        # change point size by sample
+        if (input$sizebysample != "None"){
+          g <- g +
+            geom_point(data = data, mapping =  aes(x = peakgroup_rt, y = LOBdbase_mz))+
+            geom_point(aes(size = !!as.symbol(input$sizebysample)))
+        }
+
         # Add colors for carbon number
         if(input$color=="Carbon"){
           g <- g + geom_point(aes(color=as.character(FA_total_no_C), fill = as.character(FA_total_no_C)), size =3) +
@@ -219,12 +226,7 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
           g <- g + geom_text(aes(label=compound_name),hjust=1,vjust=2,size=3)
         }
 
-        # change point size by sample
-        if (input$sizebysample != "None"){
-          g <- g +
-            geom_point(data = data, mapping =  aes(x = peakgroup_rt, y = LOBdbase_mz))+
-            geom_point(aes(size = !!as.symbol(input$sizebysample)))
-        }
+
 
         output$info <- renderTable({
           # With ggplot2, no need to tell it what the x and y variables are.
