@@ -244,71 +244,71 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
 
 
 
-      output$bar <- renderPlot({
-        tidy_run <- run %>%
-          gather(key = Sample_ID,
-                 value = Peak_Size,
-                 -species, -compound_name, -LOBdbase_mz,
-                 -peakgroup_rt, -degree_oxidation,
-                 -FA_total_no_C, -FA_total_no_DB, -Flag)
-        tidy_data <- tidy_run %>%
-          filter(is.na(FA_total_no_C) != TRUE)
-        tidy_subset <- tidy_data[tidy_data$species==input$species,]
-
-        # further subset for specific flags
-        if(input$flag != "All"){
-          tidy_subset <- tidy_subset[tidy_subset$Flag == as.character(input$flag),]
-        }
-
-        # if("All"%in%input$species!=TRUE){
-        #   tidy_data <- tidy_data[tidy_data$species==input$species,]
-        # }
-
-        # To elimate oxy compounds if desired
-        # if(input$oxy){
-        #   tidy_data <- tidy_data[tidy_data$degree_oxidation=="0",]
-        # }
-
-        # Construct inital plot with limits and points
-        b <- ggplot(data = tidy_subset, aes(x = FA_total_no_C,y = Peak_Size))+
-          geom_bar(stat = "identity", position = "stack") +
-          scale_color_manual(values = palette)+# Add colors for carbon number
-          xlab("as.character(input$xaxis)") +
-          ylab("Peak Size")+
-          theme(
-            axis.text.x = element_blank(),
-            axis.text.y = element_blank(),
-            axis.ticks = element_blank())
-
-        if(input$xaxis=="Carbon"){
-          b <- ggplot(data = tidy_subset, aes(FA_total_no_C,y = Peak_Size)) +
-            geom_bar(stat = "identity", position = "stack") +
-            scale_color_manual(values = palette)+
-            xlab(paste(input$xaxis)) +
-            ylab("Peak Size")# Add colors for carbon number
-
-        }
-
-        # Add color for DB number
-        if(input$xaxis=="Double Bonds"){
-          b <- ggplot(data = tidy_subset, aes(FA_total_no_DB, y = Peak_Size)) +
-            geom_bar(stat = "identity", position = "stack") +
-            scale_color_manual(values = palette)+
-            xlab(paste(input$xaxis)) +
-            ylab("Peak Size")# Add colors for carbon number
-        }
-
-        # Add colors
-        if(input$fill_colors=="Double Bonds"){
-          b <- b + geom_point(aes(fill=FA_total_no_DB)) +
-            scale_color_manual(values = palette)
-        }
-
-
-
-        print(b)
-
-      })
+      # output$bar <- renderPlot({
+      #   tidy_run <- run %>%
+      #     gather(key = Sample_ID,
+      #            value = Peak_Size,
+      #            -species, -compound_name, -LOBdbase_mz,
+      #            -peakgroup_rt, -degree_oxidation,
+      #            -FA_total_no_C, -FA_total_no_DB, -Flag)
+      #   tidy_data <- tidy_run %>%
+      #     filter(is.na(FA_total_no_C) != TRUE)
+      #   tidy_subset <- tidy_data[tidy_data$species==input$species,]
+      #
+      #   # further subset for specific flags
+      #   if(input$flag != "All"){
+      #     tidy_subset <- tidy_subset[tidy_subset$Flag == as.character(input$flag),]
+      #   }
+      #
+      #   # if("All"%in%input$species!=TRUE){
+      #   #   tidy_data <- tidy_data[tidy_data$species==input$species,]
+      #   # }
+      #
+      #   # To elimate oxy compounds if desired
+      #   # if(input$oxy){
+      #   #   tidy_data <- tidy_data[tidy_data$degree_oxidation=="0",]
+      #   # }
+      #
+      #   # Construct inital plot with limits and points
+      #   b <- ggplot(data = tidy_subset, aes(x = FA_total_no_C,y = Peak_Size))+
+      #     geom_bar(stat = "identity", position = "stack") +
+      #     scale_color_manual(values = palette)+# Add colors for carbon number
+      #     xlab("as.character(input$xaxis)") +
+      #     ylab("Peak Size")+
+      #     theme(
+      #       axis.text.x = element_blank(),
+      #       axis.text.y = element_blank(),
+      #       axis.ticks = element_blank())
+      #
+      #   if(input$xaxis=="Carbon"){
+      #     b <- ggplot(data = tidy_subset, aes(FA_total_no_C,y = Peak_Size)) +
+      #       geom_bar(stat = "identity", position = "stack") +
+      #       scale_color_manual(values = palette)+
+      #       xlab(paste(input$xaxis)) +
+      #       ylab("Peak Size")# Add colors for carbon number
+      #
+      #   }
+      #
+      #   # Add color for DB number
+      #   if(input$xaxis=="Double Bonds"){
+      #     b <- ggplot(data = tidy_subset, aes(FA_total_no_DB, y = Peak_Size)) +
+      #       geom_bar(stat = "identity", position = "stack") +
+      #       scale_color_manual(values = palette)+
+      #       xlab(paste(input$xaxis)) +
+      #       ylab("Peak Size")# Add colors for carbon number
+      #   }
+      #
+      #   # Add colors
+      #   if(input$fill_colors=="Double Bonds"){
+      #     b <- b + geom_point(aes(fill=FA_total_no_DB)) +
+      #       scale_color_manual(values = palette)
+      #   }
+      #
+      #
+      #
+      #   print(b)
+      #
+      # })
     }
   )
   runApp(app)

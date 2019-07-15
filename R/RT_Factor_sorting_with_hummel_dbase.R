@@ -4,12 +4,14 @@
 # input a raw lobset
 
 # Load data and RT Factor database
-#original_data <- read.csv("Edited_NoHQCs_PosAndNeg_KimT_LOBSTAHS_screened_peakdata_2019-02-26T10-58-14_AM-0500.csv")
-#RT_Factor_Dbase <-read.csv("C:/Users/TSQ/Desktop/Daniel Lowenstein/Older_Projects/RT_Factors/Hummel RtF Master Database - rtf_data.csv")
+# setwd("C:/Users/TSQ/Desktop/Daniel Lowenstein/Nano_Take_Two/Intermediate_Third/")
+# original_data <- read.csv("Nano_Intermediate_Third_Pos_Raw_LOBSTAHS_screened_peakdata_2019-06-18T2-27-43_PM-0400.csv")
+# RT_Factor_Dbase <-read.csv("C:/Users/TSQ/Desktop/Daniel Lowenstein/Older_Projects/RT_Factors/Hummel RtF Master Database - rtf_data.csv")
 
 RT_Factor_Sort <- function(original_data, RT_Factor_Dbase, choose_class = FALSE, plot_data = FALSE, save_plots = FALSE, data_title){
 
-  library(tidyverse)
+  library(tidyr)
+  library(dplyr)
 
   ### Check Inputs ###
 
