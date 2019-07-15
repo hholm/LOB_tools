@@ -14,7 +14,7 @@ LazyData: true
 Maintainer: Henry Holm <hholm@whoi.edu>
 Depends:
     R (>= 3.4),
-    Shiny,
+    shiny,
     ggplot2,
     tidyr,
     dplyr,
