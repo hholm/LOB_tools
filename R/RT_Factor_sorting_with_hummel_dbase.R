@@ -105,11 +105,13 @@ RT_Factor_Sort <- function(original_data, RT_Factor_Dbase, choose_class = FALSE,
   for (i in 1:length(Main_Lipids$compound_name)){
     which_row <- which(grepl(paste0("^", Main_Lipids$compound_name[i], "$"), RT_Factor_Dbase$compound_name))
 
-    if(is.na(RT_Factor_Dbase$Mean_DNPPE_Factor[which_row]) != TRUE ){
-      Main_Lipids$Flag[i] = "Known"
-    }else{
-      Main_Lipids$Flag[i] = "Unknown"
-    }
+    if(length(which(grepl(paste0("^", Main_Lipids$compound_name[i], "$"), RT_Factor_Dbase$compound_name))) >0){
+      if(is.na(RT_Factor_Dbase$Mean_DNPPE_Factor[which_row]) != TRUE ){
+        Main_Lipids$Flag[i] = "Known"
+      }else{
+        Main_Lipids$Flag[i] = "Unknown"
+      }
+    }else{Main_Lipids$Flag[i] = "Not In Database"}
     cat("\r")
     flush.console()
     cat("Checking for databases entries.","Compound",i,"of",length(Main_Lipids$compound_name),"...")
