@@ -142,7 +142,11 @@ LOB_viewstandard <- function(centWave){
                      plotOutput("rt_graph"),
                      plotOutput("intensity_graph"),
                      plotOutput("mz_graph")),
-            tabPanel("Plot", plotOutput("plot"))
+            tabPanel("Plot",
+                     plotOutput("plot",height = "300px"),
+                     plotOutput("plot2",height = "800px",click = "plot_click",hover = hoverOpts("plot_hover", delay = 100, delayType = "debounce")),
+                     uiOutput("hover_info")
+                     )
           )
         )
       )
@@ -344,11 +348,76 @@ LOB_viewstandard <- function(centWave){
         )
 
         #Plot grouping info
-        output$plot <- renderPlot(plotChromPeakDensity(object = centWave, mz = c(mzlow,mzhigh),rt = c(seclow, sechigh)))
-      }
-      )
+        cols <- RColorBrewer::brewer.pal(8,name = "Dark2")
+        pall <- colorRampPalette(cols)
 
+        pks <- chromPeaks(data, mz = c(mzlow,mzhigh), rt = c(seclow,sechigh), msLevel = 1L)
+        pks <- data.frame(pks)
+        fts <- featureDefinitions(data, mz = c(mzlow,mzhigh), rt = c(seclow,sechigh))
+
+        colors <-pall(nrow(pks))
+
+        output$plot <- renderPlot(
+          plotChromPeakDensity(object = centWave,
+                               mz = c(mzlow,mzhigh),
+                               rt = c(seclow, sechigh),
+                               col = colors,pch = 16)
+                                 )
+
+        output$plot2 <- renderPlot(
+          ggplot() +
+            geom_point(data = pks,size = 3,aes(x = rt,y = sample,color = sampleNames(centWave)[pks$sample]))+
+            geom_rect(fill=alpha("grey",0),alpha = 0.5,aes(xmin=fts$rtmin,xmax=fts$rtmax,ymin=min(pks$sample),ymax=max(pks$sample))) +
+            xlim(min(pks$rt)-10,max(pks$rt)+10) +
+            geom_density(aes(x = pks$rt,y = ..scaled..*length(pks$sample))) +
+            theme_minimal() +
+            theme(legend.title = element_blank(),legend.position ="none")
+
+        )
+        output$hover_info <- renderUI({
+          hover <- input$plot_hover
+          point <- nearPoints(pks, hover, threshold = 5, maxpoints = 1, addDist = TRUE)
+          if (nrow(point) == 0) return(NULL)
+
+          # calculate point position INSIDE the image as percent of total dimensions
+          # from left (horizontal) and from top (vertical)
+          left_pct <- (hover$x - hover$domain$left) / (hover$domain$right - hover$domain$left)
+          top_pct <- (hover$domain$top - hover$y) / (hover$domain$top - hover$domain$bottom)
+
+          # calculate distance from left and bottom side of the picture in pixels
+          left_px <- hover$range$left + left_pct * (hover$range$right - hover$range$left)
+          top_px <- hover$range$top + top_pct * (hover$range$bottom - hover$range$top)
+
+          # create style property fot tooltip
+          # background color is set so tooltip is a bit transparent
+          # z-index is set so we are sure are tooltip will be on top
+          style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.85); ",
+                          "left:", left_px+2, "px; top:", top_px+200, "px;")
+
+          # actual tooltip created as wellPanel
+          wellPanel(
+            style = style,
+            p(HTML(paste0("<b> Peak: </b>", rownames(point), "<br/>",
+                          "<b> MZ: </b>", point$mz, "<br/>",
+                          "<b> RT: </b>", point$rt, "<br/>",
+                          "<b> Samp: </b>", sampleNames(centWave)[point$sample], "<br/>")))
+          )
+        })
+
+        output$info <- renderTable({
+          # With ggplot2, no need to tell it what the x and y variables are.
+          # threshold: set max distance, in pixels
+          # maxpoints: maximum number of rows to return
+          # addDist: add column with distance, in pixels
+          run_table <-nearPoints(pks, input$plot_click, threshold = 20, maxpoints = 1,
+                                 addDist = TRUE)
+        }, digits = 5)
+
+      })
     }
+
+
+
 
 
     # Run the application
@@ -356,4 +425,5 @@ LOB_viewstandard <- function(centWave){
   )
   runApp(app)
 }
+
 
