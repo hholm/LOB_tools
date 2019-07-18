@@ -12,8 +12,9 @@ License: Private
 Encoding: UTF-8
 LazyData: true
 Maintainer: Henry Holm <hholm@whoi.edu>
+Depends:
+    R (>= 3.4)
 Imports:
-    R (>= 3.4),
     shiny,
     ggplot2,
     tidyr,
