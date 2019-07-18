@@ -12,7 +12,7 @@ License: Private
 Encoding: UTF-8
 LazyData: true
 Maintainer: Henry Holm <hholm@whoi.edu>
-Depends:
+Imports:
     R (>= 3.4),
     shiny,
     ggplot2,
