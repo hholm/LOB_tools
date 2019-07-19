@@ -351,9 +351,9 @@ LOB_viewstandard <- function(centWave){
         cols <- RColorBrewer::brewer.pal(8,name = "Dark2")
         pall <- colorRampPalette(cols)
 
-        pks <- chromPeaks(data, mz = c(mzlow,mzhigh), rt = c(seclow,sechigh), msLevel = 1L)
+        pks <- chromPeaks(centWave, mz = c(mzlow,mzhigh), rt = c(seclow,sechigh), msLevel = 1L)
         pks <- data.frame(pks)
-        fts <- featureDefinitions(data, mz = c(mzlow,mzhigh), rt = c(seclow,sechigh))
+        fts <- featureDefinitions(centWave, mz = c(mzlow,mzhigh), rt = c(seclow,sechigh))
 
         colors <-pall(nrow(pks))
 
