@@ -1,4 +1,4 @@
-Package: LOBtools
+Package: LOB_tools
 Title: Data Screening And Cleaning Tools For R
 Version: 0.0.1.0
 Authors@R: c(
