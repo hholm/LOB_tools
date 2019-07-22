@@ -15,6 +15,7 @@ Maintainer: Henry Holm <hholm@whoi.edu>
 Depends:
     R (>= 3.4)
 Imports:
+    lpSolveAPI,
     shiny,
     ggplot2,
     tidyr,
