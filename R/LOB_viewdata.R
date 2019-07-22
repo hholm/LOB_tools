@@ -235,7 +235,8 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
           # addDist: add column with distance, in pixels
           run_table <-nearPoints(data, input$plot_click, threshold = 20, maxpoints = 1,
                      addDist = TRUE)
-          run[which(run$xcms_peakgroup == run_table$xcms_peakgroup),c("xcms_peakgroup","compound_name","LOBdbase_mz","peakgroup_rt","Flag","lpSolve","code")]
+          columns <- c("xcms_peakgroup","compound_name","LOBdbase_mz","peakgroup_rt","Flag","lpSolve","code")
+          run[which(run$xcms_peakgroup == run_table$xcms_peakgroup),columns[which(columns %in% colnames(run))]]
         }, digits = 5)
 
         g
