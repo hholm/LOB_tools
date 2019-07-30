@@ -325,7 +325,9 @@ LOB_viewstandard <- function(object){
             geom_point(mapping = Extra_points) +
             geom_line(mapping = Extra_line,linetype="dotted") +
             ylab("Intensity") +
-            xlab("Sample Number")
+            xlab("Sample Number") +
+            scale_y_continuous(trans='log10')
+
         )
 
         mz_ppm_diff <- reordered$mz-mz
