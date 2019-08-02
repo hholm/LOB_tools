@@ -217,7 +217,7 @@ LOB_viewstandard <- function(object){
 
         #make a data frame of our sample names
 
-        samplenames <- gsub(chosenFileSubset,"",mzXMLfiles)
+        samplenames <- sampleNames(object)
 
         samplenamesframe <- data.frame(samplenames,samplenumber =
                                          seq(from=1, to=length(mzXMLfiles)))
@@ -324,7 +324,9 @@ LOB_viewstandard <- function(object){
             geom_point(mapping = Extra_points) +
             geom_line(mapping = Extra_line,linetype="dotted") +
             ylab("Intensity") +
-            xlab("Sample Number")
+            xlab("Sample Number") +
+            scale_y_continuous(trans='log10')
+
         )
 
         mz_ppm_diff <- reordered$mz-mz
