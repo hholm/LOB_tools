@@ -302,7 +302,6 @@ LOB_viewstandard <- function(object){
           pnames<- gsub(x = pnames,pattern = c("CP"),replacement = "")
           for (i in length(fts@listData[["peakidx"]])) {
             feat <- fts@listData[["peakidx"]][[i]]
-            which <- pnames %in% feat
             Extra[which(pnames %in% feat)] <- fts@rownames[i]
           }
           Extra_line <- aes(group = Extra)
@@ -363,11 +362,11 @@ LOB_viewstandard <- function(object){
           theme_minimal() +
           theme(legend.title = element_blank(),legend.position ="none")
 
-        if (hasFeatures(object)) {
+        if (hasFeatures(object) & nrow(fts)>0) {
           g <- g + geom_rect(fill=alpha("grey",0),alpha = 0.5,aes(xmin=fts$rtmin,xmax=fts$rtmax,ymin=min(pks$sample),ymax=max(pks$sample)))
         }
-       cur_x<- ggplot_build(g)$layout$panel_scales_x[[1]]$range$range
-       g <- g + xlim(cur_x[1]-20,cur_x[2]+20)
+     #  cur_x<- ggplot_build(g)$layout$panel_scales_x[[1]]$range$range
+     #  g <- g + xlim(cur_x[1]-20,cur_x[2]+20)
         output$plot2 <- renderPlot(
           g
         )
