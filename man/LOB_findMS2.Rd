@@ -26,7 +26,7 @@ LOB_findMS2(rawSpec,data=NULL,mz,rt,rtspan=175,ppm=5)
   \item{rtspan}{
   A single numeric equal setting the retention time window around the peak 'rt' (defaults to ±175 seconds).
 }
-  \item{rt}{
+  \item{ppm}{
   A single numeric equal setting the mass range around the peak 'm/z' (defaults to ±2.5 ppm). 
 }
 }
