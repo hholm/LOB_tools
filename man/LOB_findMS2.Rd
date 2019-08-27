@@ -34,7 +34,7 @@ LOB_findMS2(rawSpec,data=NULL,mz,rt,rtspan=175,ppm=5)
 Using the 'data' argumnet overides the 'mz' and 'rt' arguments. Use 'data' to search with multiple peaks at once. Use 'mz' and 'rt' to search with a single peak.
 }
 \value{
-Returns a \code[data.frame] or a list of \code[data.frame] if multipule peaks were searched with at once. 
+Returns a \code{data.frame} or a list of \code{data.frame} if multipule peaks were searched with at once. 
 }
 
 \examples{
