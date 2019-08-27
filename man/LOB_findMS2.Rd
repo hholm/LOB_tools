@@ -36,6 +36,15 @@ Using the 'data' argumnet overides the 'mz' and 'rt' arguments. Use 'data' to se
 \value{
 Returns a \code[data.frame] or a list of \code[data.frame] if multipule peaks were searched with at once. 
 }
+
+\examples{
+Example - find MS2 of DNPPE
+DNPPE_ms2 <- LOB_findMS2(rawSpec = rawSpec,
+                         mz = 875.550487,
+                         rt = 1000,
+                         ppm = 2.5)
+} 
+
 \references{
 %% ~put references to the literature/web site here ~
 }

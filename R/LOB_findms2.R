@@ -57,8 +57,5 @@ LOB_findMS2 <- function(rawSpec,data=NULL,mz,rt,rtspan=175,ppm){
   return(ms2store)
 }
 
-#Example - find MS2 of DNPPE
-DNPPE_ms2 <- LOB_findMS2(rawSpec = rawSpec,mz = 875.550487,rt = 1000,ppm = 2.5)
-
 
 
