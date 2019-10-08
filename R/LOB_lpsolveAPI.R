@@ -55,6 +55,16 @@ LOB_lpsolveAPI <- function(LOBpeaklist,choose_class=NULL,save.files=FALSE,use_ms
 
   }
 
+<<<<<<< HEAD
+=======
+  if (is.null(LOBpeaklist$Flag) & isTRUE(use_ms2)) {
+
+    stop("Input data.frame does not contain a 'Flag' column despite 'use_ms2' being set too TRUE. ",
+         "Please run RT_factor_sort() to produce Flag column.")
+
+  }
+
+>>>>>>> d5c683fbaa1f0071188f54ea5f5ec58d826d9535
   ### Define Helper Functions ###
 
   showplots<-function(X,extra){
