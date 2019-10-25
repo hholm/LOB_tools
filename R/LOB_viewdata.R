@@ -61,6 +61,7 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
                  selectInput('color', 'Point Color', c('None','Carbon','Double Bonds', 'Degree Oxidation','Species', 'Lipid Class', 'lpSolve Fitted', 'RF_Window', 'Lipid Class','Final Code')),
                  selectInput('total_carbon', 'Acyl Carbon', c('All',unique(run$FA_total_no_C)), multiple = TRUE, selected = "All"),
                  selectInput('total_db', 'Doubled Bonds', c('All',unique(run$FA_total_no_DB)), multiple = TRUE, selected = "All"),
+                 selectInput('deg_ox', 'Degree Oxidation', c('All',unique(run$degree_oxidation)), multiple = TRUE, selected = "All"),
                  selectInput('sizebysample', 'Size by Sample', c("None", colnames(run[13:(length(run)-29)])), multiple = FALSE, selected = "None"
                  ),
                  selectInput('plot_extras', 'Plot Extras', c("RTF_Window", "Labels", "Oxidized Labels"), multiple = TRUE)),
@@ -115,6 +116,11 @@ LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
         # Look at certain DB lengths
         if("All" %in% input$total_db != TRUE){
           data <- data[as.numeric(data$FA_total_no_DB) == as.numeric(input$total_db),]
+        }
+
+        # Look at certain degrees of oxidation
+        if("All" %in% input$deg_ox != TRUE){
+          data <- data[as.numeric(data$degree_oxidation) == as.numeric(input$deg_ox),]
         }
 
         # Construct inital plot with limits and points

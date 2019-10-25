@@ -54,6 +54,8 @@ LOB_lpsolveAPI <- function(LOBpeaklist, choose_class = NULL, save.files = FALSE,
     )
   }
 
+<<<<<<< HEAD
+=======
   if (is.null(LOBpeaklist$Flag) & isTRUE(use_ms2)) {
     stop(
       "Input data.frame does not contain a 'Flag' column despite 'use_ms2' being set too TRUE. ",
@@ -61,6 +63,7 @@ LOB_lpsolveAPI <- function(LOBpeaklist, choose_class = NULL, save.files = FALSE,
     )
   }
 
+>>>>>>> d5c683fbaa1f0071188f54ea5f5ec58d826d9535
   ### Define Helper Functions ###
 
   showplots <- function(X, extra) {
@@ -431,3 +434,5 @@ LOB_lpsolveAPI <- function(LOBpeaklist, choose_class = NULL, save.files = FALSE,
   }
   return(done)
 }
+
+solvedFile <- LOB_lpsolveAPI(LOBpeaklist = flagged, use_ms2 = TRUE, plot_data = TRUE)
