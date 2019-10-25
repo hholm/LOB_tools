@@ -431,5 +431,3 @@ LOB_lpsolveAPI <- function(LOBpeaklist, choose_class = NULL, save.files = FALSE,
   }
   return(done)
 }
-
-solvedFile <- LOB_lpsolveAPI(LOBpeaklist = flagged, use_ms2 = TRUE, plot_data = TRUE)
