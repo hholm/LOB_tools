@@ -1,7 +1,7 @@
 #Use to find possible MS2 from a RawSpec File. Returns a table of scans with file names.
 # Rt is a range in seconds
 
-LOB_findMS2 <- function(rawSpec,data=NULL,mz,rt,rtspan=175,ppm){
+LOB_findMS2 <- function(rawSpec,data=NULL,mz,rt,rtspan=175,ppm=2.5){
 
   if (is.null(data)) {
    run <- data.frame(mz,rt)
