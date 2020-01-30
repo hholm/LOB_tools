@@ -1,4 +1,4 @@
-LOB_viewdata <- function(LOBpeaklist, RT_Factor_Dbase){
+LOB_viewdata <- function(LOBpeaklist, rawSpec){
 
   #Make sure we have our librarys loaded
   library(shiny)
