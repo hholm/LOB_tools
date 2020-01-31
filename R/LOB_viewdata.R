@@ -66,7 +66,12 @@ LOB_viewdata <- function(LOBpeaklist, rawSpec){
                  ),
                  selectInput('plot_extras', 'Plot Extras', c("RTF_Window", "Labels", "Oxidized Labels"), multiple = TRUE)),
           column(6,
-                tableOutput(outputId = "info")
+                tableOutput(outputId = "info"),
+                actionButton(inputId = "Find_ms2",label = "Check for MS2"),
+                numericInput(inputId = "ppm",label = "ppm",value = 5,min = 0,step = 0.1),
+                numericInput(inputId = "rtspan",label = "Retention Time Window (s)",value = 200,min = 0,step = 30),
+                textOutput(outputId = 'no_sel'),
+                tableOutput(outputId = 'ms2_table')
           )),
 
         tabPanel(
@@ -87,6 +92,9 @@ LOB_viewdata <- function(LOBpeaklist, rawSpec){
 
     # Define server logic to draw our plot
     server = function(input, output) {
+
+      #Set object as NULL to prevent crashing
+      run_table <- NULL
 
       # Will update as varibles change
       output$plot <- renderPlot({
@@ -232,18 +240,43 @@ LOB_viewdata <- function(LOBpeaklist, rawSpec){
           g <- g + geom_text(aes(label=compound_name),hjust=1,vjust=2,size=3)
         }
 
-
-
         output$info <- renderTable({
           # With ggplot2, no need to tell it what the x and y variables are.
           # threshold: set max distance, in pixels
           # maxpoints: maximum number of rows to return
           # addDist: add column with distance, in pixels
-          run_table <-nearPoints(data, input$plot_click, threshold = 20, maxpoints = 1,
-                     addDist = TRUE)
+          run_table <- nearPoints(data, input$plot_click, threshold = 20, maxpoints = 1,
+                                  addDist = TRUE)
           columns <- c("xcms_peakgroup","compound_name","LOBdbase_mz","peakgroup_rt","Flag","lpSolve","code")
           run[which(run$xcms_peakgroup == run_table$xcms_peakgroup),columns[which(columns %in% colnames(run))]]
         }, digits = 5)
+
+        observeEvent(eventExpr = input$Find_ms2, {
+          run_table <- nearPoints(data, input$plot_click, threshold = 20, maxpoints = 1,
+                                  addDist = TRUE)
+          withProgress(expr = {
+            incProgress(amount = 0.5,message = "Working...")
+            if(nrow(run_table)==0){
+              output$no_sel <- renderText(
+                "Please click a feature on the plot to select it first.")
+
+            }else{
+              output$no_sel <- renderText(
+                paste("Searching for ms2 data for mass",as.character(run_table$LOBdbase_mz),"... please wait."))
+
+              output$ms2_table <- renderTable({
+                ms2 <- LOB_findMS2(rawSpec = rawSpec,
+                                   mz = run_table$LOBdbase_mz,
+                                   rt = run_table$peakgroup_rt,
+                                   ppm = input$ppm,
+                                   rtspan = input$rtspan)
+                incProgress(amount = 0.75,message = "Working...")
+                ms2[[1]]
+              })
+
+             # output$no_sel <- renderText("Searching for ms2 data... Done!")
+            }})
+        })
 
         g
 
@@ -320,3 +353,4 @@ LOB_viewdata <- function(LOBpeaklist, rawSpec){
   )
   runApp(app)
 }
+
