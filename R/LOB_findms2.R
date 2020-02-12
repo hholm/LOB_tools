@@ -29,7 +29,7 @@ LOB_findMS2 <- function(rawSpec,data=NULL,mz,rt,rtspan=175,ppm=2.5){
   rtlow<-rt-rtspan
 
   ms1mz <- as.data.frame(MSnbase::precursorMz(rawSpec))
-  ms1rt <- as.data.frame(rtime(rawSpec))
+  ms1rt <- as.data.frame(xcms::rtime(rawSpec))
   colnames(ms1mz) <- "precursorMz"
   colnames(ms1rt) <- "rtime"
 
