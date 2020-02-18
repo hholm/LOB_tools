@@ -1,4 +1,4 @@
-# LOB_lpsolveAPI
+# LOB_lpsolveAPI 2.0
 
 LOB_lpsolveAPI <- function(LOBpeaklist, choose_class = NULL, save.files = FALSE, use_ms2 = TRUE, plot_data = TRUE, use_weight = TRUE) {
   library(lpSolveAPI)
