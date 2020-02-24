@@ -263,16 +263,18 @@ LOB_viewdata <- function(LOBpeaklist, rawSpec){
             }else{
               output$no_sel <- renderText(
                 paste("Searching for ms2 data for mass",as.character(run_table$LOBdbase_mz),"... please wait."))
-
+              ms2 <- LOB_findMS2(rawSpec = rawSpec,
+                                 mz = run_table$LOBdbase_mz,
+                                 rt = run_table$peakgroup_rt,
+                                 ppm = input$ppm,
+                                 rtspan = input$rtspan)
               output$ms2_table <- renderTable({
-                ms2 <- LOB_findMS2(rawSpec = rawSpec,
-                                   mz = run_table$LOBdbase_mz,
-                                   rt = run_table$peakgroup_rt,
-                                   ppm = input$ppm,
-                                   rtspan = input$rtspan)
-                incProgress(amount = 0.75,message = "Working...")
                 ms2[[1]]
-              })
+                })
+              ms2[[1]][,"file"]
+              output$no_sel <- renderText(
+                paste("Searching for ms2 data for mass",as.character(run_table$LOBdbase_mz),"... Done. First file with most scans:",as.character(names(which(table(ms2matchs[,'file']) == max(table(ms2matchs[,'file']))))[1]))
+              )
 
              # output$no_sel <- renderText("Searching for ms2 data... Done!")
             }})
