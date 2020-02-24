@@ -1,6 +1,6 @@
-# LOB_lpsolveAPI
+# LOB_lpsolveAPI 2.0
 
-LOB_lpsolveAPI <- function(LOBpeaklist, choose_class = NULL, save.files = FALSE, use_ms2 = FALSE, plot_data = FALSE) {
+LOB_lpsolveAPI <- function(LOBpeaklist, choose_class = NULL, save.files = FALSE, use_ms2 = TRUE, plot_data = TRUE, use_weight = TRUE) {
   library(lpSolveAPI)
 
   ### Check Inputs ###
@@ -61,6 +61,18 @@ LOB_lpsolveAPI <- function(LOBpeaklist, choose_class = NULL, save.files = FALSE,
     )
   }
 
+  if (is.null(LOBpeaklist$weights) & isTRUE(use_weight)) {
+    stop(
+      "Input data.frame does not contain a 'weight' column despite 'use_weight' being set too TRUE. ",
+      "Please add weights for your lipids."
+    )
+  }
+
+  if (isFALSE(use_weight)) {
+    cat("use_weight is set to FALSE. All lipids will be weighted equally.")
+    LOBpeaklist$weights <- rep(1,nrow(LOBpeaklist))
+  }
+
   ### Define Helper Functions ###
 
   showplots <- function(X, extra) {
@@ -70,21 +82,21 @@ LOB_lpsolveAPI <- function(LOBpeaklist, choose_class = NULL, save.files = FALSE,
     # run <-run[run$match_ID %in% LOBpeaklist$match_ID,]
 
     print(ggplot(X, aes(x = peakgroup_rt, y = LOBdbase_mz, color = lpSolve)) +
-      scale_color_manual(values = c("Maybe" = "#e7cd08", "No" = "#e70808", "Yes" = "#08e799")) +
-      geom_point() +
-      geom_text(
-        label = paste0(
-          as.character(X$FA_total_no_C), ":",
-          as.character(X$FA_total_no_DB)
-        ),
-        hjust = 1,
-        vjust = 2,
-        size = 3,
-        color = "black"
-      ) +
-      ggtitle(paste0("lpSolve Screened Data - ", as.character(X$species), "-", extra)) +
-      xlab("Peak Group Retention Time (sec)") +
-      ylab("Peak Group m/z"))
+            scale_color_manual(values = c("Maybe" = "#e7cd08", "No" = "#e70808", "Yes" = "#08e799")) +
+            geom_point() +
+            geom_text(
+              label = paste0(
+                as.character(X$FA_total_no_C), ":",
+                as.character(X$FA_total_no_DB)
+              ),
+              hjust = 1,
+              vjust = 2,
+              size = 3,
+              color = "black"
+            ) +
+            ggtitle(paste0("lpSolve Screened Data - ", as.character(X$species), "-", extra)) +
+            xlab("Peak Group Retention Time (sec)") +
+            ylab("Peak Group m/z"))
   }
 
   screen <- function(X) {
@@ -200,7 +212,7 @@ LOB_lpsolveAPI <- function(LOBpeaklist, choose_class = NULL, save.files = FALSE,
       for (i in 1:num_points) {
         set.column(lpmodel, i, rep(1, length(which(Final_Exclusion_Matrix[, i] == 1))), which(Final_Exclusion_Matrix[, i] == 1))
       }
-      set.objfn(lpmodel, rep(1, num_points))
+      set.objfn(lpmodel, run$weights)
 
       # find first solution
       status <- solve(lpmodel)
@@ -227,7 +239,9 @@ LOB_lpsolveAPI <- function(LOBpeaklist, choose_class = NULL, save.files = FALSE,
       run[which(bar == 0), "Type"] <- "No"
       run[which(bar != nrow(sols) & bar != 0), "Type"] <- "Maybe"
       run[which(bar == nrow(sols)), "Type"] <- "Yes"
-      return[return$match_ID %in% run$match_ID, "lpSolve"] <- run[order(run$match_ID), "Type"]
+      for (g in 1:nrow(run)) {
+        return[which(return$match_ID == run[g,"match_ID"]), "lpSolve"] <- run[g,"Type"]
+      }
     }
     # }
     return(return)
@@ -264,7 +278,8 @@ LOB_lpsolveAPI <- function(LOBpeaklist, choose_class = NULL, save.files = FALSE,
         LOBrun$species,
         LOBrun$DNPPE_Factor,
         LOBrun$Flag,
-        LOBrun$DBase_DNPPE_RF
+        LOBrun$DBase_DNPPE_RF,
+        LOBrun$weights
       )
       # Re-name our column names
       colnames(PRErun) <- c(
@@ -277,7 +292,8 @@ LOB_lpsolveAPI <- function(LOBpeaklist, choose_class = NULL, save.files = FALSE,
         "species",
         "DNPPE_Factor",
         "Flag",
-        "DBase_DNPPE_RF"
+        "DBase_DNPPE_RF",
+        "weights"
       )
     } else {
       PRErun <- data.frame(

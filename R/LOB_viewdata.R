@@ -1,4 +1,4 @@
-LOB_viewdata <- function(LOBpeaklist, rawSpec){
+LOB_viewdata <- function(LOBpeaklist, rawSpec = NULL){
 
   #Make sure we have our librarys loaded
   library(shiny)
@@ -252,6 +252,9 @@ LOB_viewdata <- function(LOBpeaklist, rawSpec){
         }, digits = 5)
 
         observeEvent(eventExpr = input$Find_ms2, {
+          if (is.null(rawSpec)) {
+            output$no_sel <- renderText(paste("No rawSpec objected loaded to read MS2 from."))
+          }else{
           run_table <- nearPoints(data, input$plot_click, threshold = 20, maxpoints = 1,
                                   addDist = TRUE)
           withProgress(expr = {
@@ -278,7 +281,7 @@ LOB_viewdata <- function(LOBpeaklist, rawSpec){
 
              # output$no_sel <- renderText("Searching for ms2 data... Done!")
             }})
-        })
+        }})
 
         g
 
