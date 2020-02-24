@@ -424,23 +424,32 @@ LOB_lpsolveAPI <- function(LOBpeaklist, choose_class = NULL, save.files = FALSE,
     #          width = 22, height = 17)
     # }
     cat("\n")
+    a <- NULL
     if (use_ms2 == TRUE & Final_Switch == TRUE) {
       test <- unique(screened[which(screened$match_ID %in% use2screen$match_ID), "lpSolve"])
       if ("No" %in% test) {
         cat("\n")
         warning("Not all MS2v peaks included in solution.")
-        done[done$match_ID %in% screened_plot$match_ID, "lpSolve"] <- screened_plot[order(screened_plot$match_ID), "lpSolve"]
+        for (a in 1:nrow(screened_plot)) {
+          done[which(done$match_ID == screened_plot[a,"match_ID"]), "lpSolve"] <- screened_plot[a,"lpSolve"]
+        }
       }
       if ("Maybe" %in% test) {
         cat("\n")
         warning("Not all MS2v peaks included in solution.")
-        done[done$match_ID %in% screened_plot$match_ID, "lpSolve"] <- screened_plot[order(screened_plot$match_ID), "lpSolve"]
+        for (a in 1:nrow(screened_plot)) {
+          done[which(done$match_ID == screened_plot[a,"match_ID"]), "lpSolve"] <- screened_plot[a,"lpSolve"]
+        }
       }
       cat("\n")
       cat("All MS2v peaks included in solution!")
-      done[done$match_ID %in% screened_plot$match_ID, "lpSolve"] <- screened_plot[order(screened_plot$match_ID), "lpSolve"]
+      for (a in 1:nrow(screened_plot)) {
+        done[which(done$match_ID == screened_plot[a,"match_ID"]), "lpSolve"] <- screened_plot[a,"lpSolve"]
+      }
     } else {
-      done[done$match_ID %in% screened_plot$match_ID, "lpSolve"] <- screened_plot[order(screened_plot$match_ID), "lpSolve"]
+      for (a in 1:nrow(screened_plot)) {
+        done[which(done$match_ID == screened_plot[a,"match_ID"]), "lpSolve"] <- screened_plot[a,"lpSolve"]
+      }
       cat("Class Screened without MS2 data.")
     }
     cat("\n")
