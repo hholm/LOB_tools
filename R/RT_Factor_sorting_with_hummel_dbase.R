@@ -133,7 +133,7 @@ cat("\n")
 
     if(Known_RtFs$DNPPE_Factor[i] < (RT_Factor_Dbase$Mean_DNPPE_Factor[which_row]*1.1) & Known_RtFs$DNPPE_Factor[i] > (RT_Factor_Dbase$Mean_DNPPE_Factor[which_row]*0.9)){
       if(Known_RtFs$DNPPE_Factor[i] < (RT_Factor_Dbase$Mean_DNPPE_Factor[which_row]*1.05) & Known_RtFs$DNPPE_Factor[i] > (RT_Factor_Dbase$Mean_DNPPE_Factor[which_row]*0.95)){
-        if(RT_Factor_Dbase$ms2_verified[which_row] == "Yes"){
+        if(!is.na(RT_Factor_Dbase$ms2_verified[which_row]) & RT_Factor_Dbase$ms2_verified[which_row] == "Yes"){
           Known_RtFs$Flag[i] = "ms2v"
         }else{
           Known_RtFs$Flag[i] = "5%_rtv"
