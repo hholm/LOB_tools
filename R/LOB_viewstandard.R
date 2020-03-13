@@ -230,6 +230,8 @@ LOB_viewstandard <- function(object){
           fts <- featureDefinitions(object,
                                     mz = c(mzlow,mzhigh),
                                     rt = c(seclow,sechigh))
+        }else{
+          fts <- NULL
         }
 
         #turn our matrix into a dataframe
@@ -292,7 +294,13 @@ LOB_viewstandard <- function(object){
         Extra_line <- NULL
         Extra_points <- NULL
         Extra <- rep("No Group",nrow(peaks))
-        if (hasFeatures(object) & nrow(fts)>0) {
+
+        #If fts doesnt exist make a blank dataframe so our next if statment doesnt throw an error
+        if (is.null(fts)){
+          fts <- data.frame(matrix(nrow = 0,ncol = 0))
+        }
+
+        if(hasFeatures(object) & nrow(fts)>0) {
           pnames<- gsub(x = rownames(peaks),pattern = c("CP000000"),replacement = "")
           pnames<- gsub(x = pnames,pattern = c("CP00000"),replacement = "")
           pnames<- gsub(x = pnames,pattern = c("CP0000"),replacement = "")

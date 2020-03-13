@@ -1,7 +1,7 @@
 #Use to find possible MS2 from a RawSpec File. Returns a table of scans with file names.
 # Rt is a range in seconds
 
-LOB_findMS2 <- function(rawSpec,data=NULL,mz,rt,rtspan=175,ppm){
+LOB_findMS2 <- function(rawSpec,data=NULL,mz,rt,rtspan=175,ppm=2.5){
 
   if (is.null(data)) {
    run <- data.frame(mz,rt)
@@ -29,7 +29,7 @@ LOB_findMS2 <- function(rawSpec,data=NULL,mz,rt,rtspan=175,ppm){
   rtlow<-rt-rtspan
 
   ms1mz <- as.data.frame(MSnbase::precursorMz(rawSpec))
-  ms1rt <- as.data.frame(rtime(rawSpec))
+  ms1rt <- as.data.frame(xcms::rtime(rawSpec))
   colnames(ms1mz) <- "precursorMz"
   colnames(ms1rt) <- "rtime"
 

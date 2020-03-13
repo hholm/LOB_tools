@@ -15,6 +15,10 @@ RT_Factor_Sort <- function(original_data, RT_Factor_Dbase, choose_class = FALSE,
 
   ### Check Inputs ###
 
+  if (class(original_data) == "LOBset") {
+    stop("You are trying to screen a LOBset object. Use getLOBpeaklist to generate a peaklist.")
+  }
+
   if (is.null(RT_Factor_Dbase$Mean_DNPPE_Factor)) {
 
     stop("Looks like input 'RT_Factor_Dbase' is not the right one.\n",
