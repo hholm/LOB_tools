@@ -118,17 +118,17 @@ LOB_viewdata <- function(LOBpeaklist, rawSpec = NULL){
 
         # only look at certain acyl lengths
         if("All" %in% input$total_carbon != TRUE){
-          data <- data[as.numeric(data$FA_total_no_C) == as.numeric(input$total_carbon),]
+          data <- data[data$FA_total_no_C == as.numeric(input$total_carbon),]
         }
 
         # Look at certain DB lengths
         if("All" %in% input$total_db != TRUE){
-          data <- data[as.numeric(data$FA_total_no_DB) == as.numeric(input$total_db),]
+          data <- data[data$FA_total_no_DB == as.numeric(input$total_db),]
         }
 
         # Look at certain degrees of oxidation
         if("All" %in% input$deg_ox != TRUE){
-          data <- data[as.numeric(data$degree_oxidation) == as.numeric(input$deg_ox),]
+          data <- data[data$degree_oxidation == as.numeric(input$deg_ox),]
         }
 
         # Construct inital plot with limits and points
