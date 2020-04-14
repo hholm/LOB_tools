@@ -8,7 +8,7 @@
 # original_data <- read.csv("Nano_Intermediate_Third_Pos_Raw_LOBSTAHS_screened_peakdata_2019-06-18T2-27-43_PM-0400.csv")
 # RT_Factor_Dbase <-read.csv("C:/Users/TSQ/Desktop/Daniel Lowenstein/Older_Projects/RT_Factors/Hummel RtF Master Database - rtf_data.csv")
 
-RT_Factor_Sort <- function(original_data, RT_Factor_Dbase, choose_class = FALSE, plot_data = FALSE, save_plots = FALSE, data_title){
+LOB_RTFsort <- function(original_data, RT_Factor_Dbase, choose_class = FALSE, plot_data = FALSE, save_plots = FALSE, data_title){
 
   library(tidyr)
   library(dplyr)
@@ -207,7 +207,7 @@ RT_Factor_Sort <- function(original_data, RT_Factor_Dbase, choose_class = FALSE,
 
     # add a column for plot labelling by C and DB #
     lipidclass <- Flagged_Data %>%
-      mutate(C_DB = paste0(str_extract(FA_total_no_C, "\\d+"), ":", str_extract(FA_total_no_DB, "\\d+"))) %>%
+      mutate(C_DB = paste0(stringr::str_extract(FA_total_no_C, "\\d+"), ":", stringr::str_extract(FA_total_no_DB, "\\d+"))) %>%
       filter(degree_oxidation == 0)
 
     # going through the big nine lipids plus TAGs, DAGs, and FFAs
