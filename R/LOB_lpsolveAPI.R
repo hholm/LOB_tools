@@ -308,7 +308,7 @@ LOB_lpsolveAPI <- function(LOBpeaklist, choose_class = NULL, save.files = FALSE,
       data["rt_prediction"] <- NA
     }
     
-    if(nrow(data[which(data$code == "RTF_Confirmed" | data$Final_cut[i]  == "keep" | data$Final_cut[i] == "Keep"),]) < 3){
+    if(nrow(data[which(data$code == "RTF_Confirmed" | data$Final_cut  == "keep" | data$Final_cut == "Keep"),]) < 3){
       data$weights <- 1
       return(data)
     }
