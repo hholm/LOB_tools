@@ -1,7 +1,7 @@
 # Use to find possible MS2 from a RawSpec File. Returns a table of scans with file names.
 # Rt is a range in seconds
 
-LOB_findMS2 <- function(rawSpec, data = NULL, mz, rt, rtspan = 175, ppm = 2.5) {
+LOB_findMS2 <- function(rawSpec, data = NULL, mz, rt, rtspan = 175, ppm = 100) {
 
   # Test if the data is entered in a dataframe (data argument) or with mz, rt, ect arguments.
   # Reformate info into temp 'run' df and list of compounds to search for

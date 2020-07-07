@@ -68,7 +68,7 @@ LOB_viewdata <- function(LOBpeaklist, rawSpec = NULL){
           column(6,
                 tableOutput(outputId = "info"),
                 actionButton(inputId = "Find_ms2",label = "Check for MS2"),
-                numericInput(inputId = "ppm",label = "ppm",value = 5,min = 0,step = 0.1),
+                numericInput(inputId = "ppm",label = "ppm",value = 100,min = 0.5,step = 1),
                 numericInput(inputId = "rtspan",label = "Retention Time Window (s)",value = 200,min = 0,step = 30),
                 textOutput(outputId = 'no_sel'),
                 tableOutput(outputId = 'ms2_table')
