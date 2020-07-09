@@ -58,7 +58,7 @@ LOB_viewdata <- function(LOBpeaklist, rawSpec = NULL){
           ),
           column(3,
                  selectInput('class', 'Select Lipid Class', c("All", as.character(unique(run$species))), multiple = TRUE, selected = "All"),
-                 selectInput('color', 'Point Color', c('None','Carbon','Double Bonds', 'Degree Oxidation','Species', 'Lipid Class', 'lpSolve Fitted', 'RF_Window', 'Lipid Class','Final Code')),
+                 selectInput('color', 'Point Color', c('None','Carbon','Double Bonds', 'Degree Oxidation','Species', 'Lipid Class', 'lpSolve Fitted', 'RF_Window', 'Lipid Class','Adduct Summary','Final Code')),
                  selectInput('total_carbon', 'Acyl Carbon', c('All',unique(run$FA_total_no_C)), multiple = TRUE, selected = "All"),
                  selectInput('total_db', 'Doubled Bonds', c('All',unique(run$FA_total_no_DB)), multiple = TRUE, selected = "All"),
                  selectInput('deg_ox', 'Degree Oxidation', c('All',unique(run$degree_oxidation)), multiple = TRUE, selected = "All"),
@@ -209,7 +209,7 @@ LOB_viewdata <- function(LOBpeaklist, rawSpec = NULL){
 
         #Add color for adduct summary
         if(input$color=="Adduct Summary"){
-          g <- g + geom_point(aes(color=as.character(code), fill = as.character(code)),size=3) +
+          g <- g + geom_point(aes(color=as.character(adduct_summary), fill = as.character(adduct_summary)),size=3) +
             scale_color_manual(values = c("Completely_satisfied"="#2aff00","Somewhat_satisfied"="#ff9e44","No_other_adducts"="#B22222"))
         }
 
@@ -219,6 +219,7 @@ LOB_viewdata <- function(LOBpeaklist, rawSpec = NULL){
             scale_color_manual(values = c("#E8DA1E","#FF3030","#B6EEA6"))
         }
 
+        # Add colors for RF windows
         if(input$color=="RF_Window"){
           g <- g +
             geom_point(aes(color=as.character(Flag), fill = as.character(Flag)),size=3) +
