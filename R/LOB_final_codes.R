@@ -92,6 +92,10 @@ eval_dupls <- function(flagged_set){
   }
   cat("Done!")
 
+  flagged_set[which(flagged_set$C2a == 1),"adduct_summary"] <- "Completely_satisfied"
+  flagged_set[which(flagged_set$C2b == 1),"adduct_summary"] <- "Somewhat_satisfied"
+  flagged_set[which(flagged_set$C1 == 1),"adduct_summary"] <- "No_other_adducts"
+
   #Adding a column to indicate whether isomers have been resolved
   # flagged_set$resolved <- rep(NA,length(flagged_set$code))
   # i <- NULL

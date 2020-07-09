@@ -207,6 +207,12 @@ LOB_viewdata <- function(LOBpeaklist, rawSpec = NULL){
             scale_color_manual(values = c("LP_Solve_Confirmed"="#66CD00", "10%_rtv"="#66CD00","False_Assignment"="#FF3030", "Red"="#FF3030","RTF_Confirmed"="#2aff00", "ms2v"="#0000FF", "5%_rtv"="#2aff00","LP_Solve_Maybe"="#ff9e44", "Double_Peak?"="#ff9e44", "Double Check"="#ff9e44","Unknown"="#000000", "LP_Solve_Failure"="#B22222", "RTF_Failure"="#B22222"))
         }
 
+        #Add color for adduct summary
+        if(input$color=="Adduct Summary"){
+          g <- g + geom_point(aes(color=as.character(code), fill = as.character(code)),size=3) +
+            scale_color_manual(values = c("Completely_satisfied"="#2aff00","Somewhat_satisfied"="#ff9e44","No_other_adducts"="#B22222"))
+        }
+
         # Add colors for lpSolve solutions
         if(input$color=="lpSolve Fitted"){
           g <- g + geom_point(aes(color=as.character(lpSolve), fill = as.character(lpSolve)),size=3) +
