@@ -20,6 +20,9 @@ Depends:
     tidyr,
     dplyr
 Imports:
+    MSnbase,
+    xcms
+
 
 
  
