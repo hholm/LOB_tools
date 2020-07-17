@@ -1,9 +1,9 @@
 LOB_viewLOBset <- function(LOBset) {
 
   # Make sure we have our librarys loaded
-  library(shiny)
-  library(tidyverse)
-  library(RColorBrewer)
+  #library(shiny)
+  #library(tidyverse)
+  #library(RColorBrewer)
 
   # Rename our peak list so we can modify it and keep the complete one
   peakdata <- peakdata(LOBset)
@@ -135,29 +135,23 @@ LOB_viewLOBset <- function(LOBset) {
           g <- g + ylim(c(input$mz[1], input$mz[2]))
         }
 
-        # adding labels to each point
-        if (!is.null(input$plot_extras)) {
-          if ("Labels" %in% input$plot_extras) {
+        #adding labels to each point
+        if(!is.null(input$plot_extras)){
+          if("Labels" %in% input$plot_extras){
             g <- g +
-              geom_text(aes(
-                x = peakgroup_rt, y = LOBdbase_mz,
-                label = (paste0(str_extract(FA_total_no_C, "\\d+"), ":", str_extract(FA_total_no_DB, "\\d+"))),
-                hjust = 1, vjust = 2
-              ))
-          }
-        }
+              geom_text(aes(x = peakgroup_rt, y = LOBdbase_mz,
+                            label = paste0(FA_total_no_C,":", FA_total_no_DB),
+                            hjust = 1, vjust = 2))
+          }}
 
-        # adding oxidation labels to each point
-        if (!is.null(input$plot_extras)) {
-          if ("Oxidized Labels" %in% input$plot_extras) {
+        #adding oxidation labels to each point
+        if(!is.null(input$plot_extras)){
+          if("Oxidized Labels" %in% input$plot_extras){
             g <- g +
-              geom_text(aes(
-                x = peakgroup_rt, y = LOBdbase_mz,
-                label = (paste0(str_extract(FA_total_no_C, "\\d+"), ":", str_extract(FA_total_no_DB, "\\d+"), ":", str_extract(degree_oxidation, "\\d+"))),
-                hjust = 1, vjust = 2
-              ))
-          }
-        }
+              geom_text(aes(x = peakgroup_rt, y = LOBdbase_mz,
+                            label = paste0(FA_total_no_C,":",FA_total_no_DB,":",degree_oxidation),
+                            hjust = 1, vjust = 2))
+          }}
 
         # change point size by sample
         if (input$sizebysample != "None") {

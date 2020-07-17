@@ -10,8 +10,8 @@
 
 LOB_RTFsort <- function(original_data, RT_Factor_Dbase, choose_class = FALSE, plot_data = FALSE, save_plots = FALSE, data_title){
 
-  library(tidyr)
-  library(dplyr)
+  #library(tidyr)
+  #library(dplyr)
 
   ### Check Inputs ###
 

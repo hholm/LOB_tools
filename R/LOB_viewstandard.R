@@ -14,11 +14,11 @@
 
 LOB_viewstandard <- function(object){
 
-  library(shiny)
+  #library(shiny)
 
-  library(xcms)
+  #library(xcms)
 
-  library(ggplot2)
+  #library(ggplot2)
 
   # #Create a value for each standard
   rownames <- c("mz","ppm","rtlow","rthigh")
@@ -354,8 +354,8 @@ LOB_viewstandard <- function(object){
                                           '\nrthigh =',rthigh))
 
         #Plot grouping info
-        cols <- RColorBrewer::brewer.pal(8,name = "Dark2")
-        pall <- colorRampPalette(cols)
+        cols <- c("#1B9E77","#D95F02","#7570B3","#E7298A","#66A61E","#E6AB02", "#A6761D","#666666")
+        pall <- grDevices::colorRampPalette(cols)
         pks <- data.frame(peaks)
         pks$feature_group <- Extra
         colors <-pall(nrow(pks))
