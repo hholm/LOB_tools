@@ -18,8 +18,7 @@ Depends:
     shiny,
     ggplot2,
     tidyr,
-    dplyr,
-    xcms
+    dplyr
 Imports:
 
 
