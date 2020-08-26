@@ -5,3 +5,14 @@ import("lpSolveAPI",
        "dplyr",
        "xcms",
        "stats")
+
+export("LOB_viewstandard",
+       "LOB_viewLOBset",
+       "LOB_viewdata",
+       "LOB_RTFsort",
+       "Update_Hummel_database",
+       "LOB_meanDB",
+       "LOB_lpsolveAPI",
+       "LOB_lpsolve",
+       "LOB_findMS2",
+       "eval_dupls")
