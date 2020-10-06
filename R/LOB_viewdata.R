@@ -1,12 +1,20 @@
-LOB_viewdata <- function(LOBpeaklist, rawSpec = NULL){
+LOB_viewdata <- function(peakdata, rawSpec = NULL){
 
   #Make sure we have our librarys loaded
   #library(shiny)
   #library(tidyverse)
   #library(RColorBrewer)
 
+  if (!class(peakdata) %in% c("data.frame","LOBSet")) {
+    stop("Input peakdata is neither a 'data.frame' nor 'LOBSet'.")
+  }
+
   #Rename our peak list so we can modify it and keep the complete one
-  run <- LOBpeaklist
+  if (is.data.frame(peakdata)) {
+    run <- peakdata
+  }else{
+    run <- peakdata(peakdata)
+  }
 
 
   # Set up our large color pallete

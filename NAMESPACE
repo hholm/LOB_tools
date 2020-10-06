@@ -7,7 +7,6 @@ import("lpSolveAPI",
        "stats")
 
 export("LOB_viewstandard",
-       "LOB_viewLOBset",
        "LOB_viewdata",
        "LOB_RTFsort",
        "Update_Hummel_database",
@@ -15,4 +14,4 @@ export("LOB_viewstandard",
        "LOB_lpsolveAPI",
        "LOB_lpsolve",
        "LOB_findMS2",
-       "eval_dupls")
+       "LOB_final_codes")

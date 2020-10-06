@@ -8,15 +8,27 @@
 # original_data <- read.csv("Nano_Intermediate_Third_Pos_Raw_LOBSTAHS_screened_peakdata_2019-06-18T2-27-43_PM-0400.csv")
 # RT_Factor_Dbase <-read.csv("C:/Users/TSQ/Desktop/Daniel Lowenstein/Older_Projects/RT_Factors/Hummel RtF Master Database - rtf_data.csv")
 
-LOB_RTFsort <- function(original_data, RT_Factor_Dbase, choose_class = FALSE, plot_data = FALSE, save_plots = FALSE, data_title){
+LOB_RTFsort <- function(peakdata, RT_Factor_Dbase, choose_class = NULL, plot_data = FALSE, save_plots = FALSE, data_title){
 
   #library(tidyr)
   #library(dplyr)
 
   ### Check Inputs ###
 
-  if (class(original_data) == "LOBset") {
-    stop("You are trying to screen a LOBset object. Use getLOBpeaklist to generate a peaklist.")
+  # check that lipid input is a LOBSet or a data.frame
+  if (!class(peakdata) %in% c("data.frame","LOBSet")) {
+    stop("Input original_data is neither a 'data.frame' nor 'LOBSet'.")
+  }
+
+  # read peaklist data from LOBset if nessisary
+  if (is.data.frame(peakdata)) {
+    original_data <- peakdata
+  }else{
+    original_data <- peakdata(peakdata)
+  }
+
+  if (!is.data.frame(RT_Factor_Dbase)) {
+    stop("RT_Factor_Dbase is not a data.frame")
   }
 
   if (is.null(RT_Factor_Dbase$Mean_DNPPE_Factor)) {
@@ -96,7 +108,7 @@ LOB_RTFsort <- function(original_data, RT_Factor_Dbase, choose_class = FALSE, pl
     )
 
   # if you're choosing a class
-  if(choose_class != FALSE){
+  if(!is.null(choose_class)){
     Main_Lipids <- original_data[original_data$species == choose_class, ] %>%
       filter(degree_oxidation == "0")
   }
@@ -240,6 +252,12 @@ LOB_RTFsort <- function(original_data, RT_Factor_Dbase, choose_class = FALSE, pl
     cat("Done!")
   }
 
-  return(Flagged_Data)
+  # output to match inputed format, whether that is LOBSet of data.frame
+  if (is.data.frame(peakdata)) {
+    return(Flagged_Data)
+  }else{
+    peakdata@peakdata <- Flagged_Data
+    return(peakdata)
+  }
 }
 

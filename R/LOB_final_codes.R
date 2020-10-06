@@ -1,4 +1,19 @@
-eval_dupls <- function(flagged_set){
+LOB_final_codes <- function(peakdata){
+
+  # check inputs class
+  if (!class(peakdata) %in% c("data.frame","LOBSet")) {
+    stop(
+      "Input 'peakdata' is not an 'data.frame' or 'LOBset' object.\n",
+      "Please use one of these formats for your peakdata."
+    )
+  }
+
+  #Rename our peak list so we can modify it and keep the complete one
+  if (is.data.frame(peakdata)) {
+    flagged_set <- peakdata
+  }else{
+    flagged_set <- peakdata(peakdata)
+  }
 
   library(tidyverse)
   flagged_set <- flagged_set %>% mutate(code = "Unknown")
@@ -110,6 +125,12 @@ eval_dupls <- function(flagged_set){
   #   }
   # }
 
-  return(flagged_set)
+  if (is.data.frame(peakdata)) {
+    return(flagged_set)
+  }else{
+    peakdata@peakdata <- flagged_set
+    return(peakdata)
+  }
+
 }
 
