@@ -24,7 +24,7 @@ LOB_RTFsort <- function(peakdata, RT_Factor_Dbase, choose_class = NULL, plot_dat
   if (is.data.frame(peakdata)) {
     original_data <- peakdata
   }else{
-    original_data <- peakdata(peakdata)
+    original_data <- LOBSTAHS::peakdata(peakdata)
   }
 
   if (!is.data.frame(RT_Factor_Dbase)) {
@@ -96,11 +96,11 @@ LOB_RTFsort <- function(peakdata, RT_Factor_Dbase, choose_class = NULL, plot_dat
   # Add column for DNPPE factor and an empty one for flagging
   original_data <- original_data %>%
     mutate(DNPPE_Factor = peakgroup_rt/DNPPE_RT, Flag = "None", DBase_DNPPE_RF = "NA") %>%
-    filter(species != "NA")
+    dplyr::filter(species != "NA")
 
   # isolate major intact polar lipid classes, unoxidized (need to add pigments, etc.)
   Main_Lipids <- original_data %>%
-    filter(degree_oxidation == "0",
+    dplyr::filter(degree_oxidation == "0",
            lipid_class == "IP_DAG"|
              lipid_class == "IP_MAG"|
              lipid_class == "TAG"|
@@ -110,12 +110,12 @@ LOB_RTFsort <- function(peakdata, RT_Factor_Dbase, choose_class = NULL, plot_dat
   # if you're choosing a class
   if(!is.null(choose_class)){
     Main_Lipids <- original_data[original_data$species == choose_class, ] %>%
-      filter(degree_oxidation == "0")
+      dplyr::filter(degree_oxidation == "0")
   }
 
   # isolate oxidized lipids into df
   Ox_Lipids <- original_data %>%
-    filter(degree_oxidation > 0)
+    dplyr::filter(degree_oxidation > 0)
 
   # flag known vs unknown by checking whether grepl returns anything in the database
   for (i in 1:length(Main_Lipids$compound_name)){
@@ -135,8 +135,8 @@ LOB_RTFsort <- function(peakdata, RT_Factor_Dbase, choose_class = NULL, plot_dat
   cat("Done!")
 
   # separate into two dfs
-  Known_RtFs <- Main_Lipids %>% filter(Flag == "Known")
-  Unknown_RtFs <- Main_Lipids %>% filter(Flag == "Unknown")
+  Known_RtFs <- Main_Lipids %>% dplyr::filter(Flag == "Known")
+  Unknown_RtFs <- Main_Lipids %>% dplyr::filter(Flag == "Unknown")
 
   # for each compound in the "Known" df, grab its corresponding row number in RT_Factor_Dbase,
   # then flag it as follows
@@ -169,7 +169,7 @@ LOB_RTFsort <- function(peakdata, RT_Factor_Dbase, choose_class = NULL, plot_dat
   cat("Done!")
 
   # check for possible double peaks
-  Green_Flags <- Known_RtFs %>% filter(Flag == "ms2v" | Flag == "5%_rtv" | Flag == "10%_rtv")
+  Green_Flags <- Known_RtFs %>% dplyr::filter(Flag == "ms2v" | Flag == "5%_rtv" | Flag == "10%_rtv")
   split_by_compound_name <- split(Green_Flags,
                                   duplicated(Green_Flags$compound_name)|duplicated(Green_Flags$compound_name, fromLast = TRUE))
   Multiple_Flags <- split_by_compound_name[["TRUE"]]
@@ -220,7 +220,7 @@ LOB_RTFsort <- function(peakdata, RT_Factor_Dbase, choose_class = NULL, plot_dat
     # add a column for plot labelling by C and DB #
     lipidclass <- Flagged_Data %>%
       mutate(C_DB = paste0(stringr::str_extract(FA_total_no_C, "\\d+"), ":", stringr::str_extract(FA_total_no_DB, "\\d+"))) %>%
-      filter(degree_oxidation == 0)
+      dplyr::filter(degree_oxidation == 0)
 
     # going through the big nine lipids plus TAGs, DAGs, and FFAs
     lipid_classes <- unique(Main_Lipids$species)
@@ -229,7 +229,7 @@ LOB_RTFsort <- function(peakdata, RT_Factor_Dbase, choose_class = NULL, plot_dat
     cat("\n")
     for (i in 1:length(lipid_classes)){
       Lipid <- lipidclass %>%
-        filter(species == paste(lipid_classes[i]))
+        dplyr::filter(species == paste(lipid_classes[i]))
 
       print(ggplot(data = Lipid)+
               geom_point(aes(x = peakgroup_rt, y = LOBdbase_mz, color =  Flag, size = 0.05))+

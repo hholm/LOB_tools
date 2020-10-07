@@ -12,10 +12,10 @@ LOB_final_codes <- function(peakdata){
   if (is.data.frame(peakdata)) {
     flagged_set <- peakdata
   }else{
-    flagged_set <- peakdata(peakdata)
+    flagged_set <- LOBSTAHS::peakdata(peakdata)
   }
 
-  library(tidyverse)
+  #library(tidyverse)
   flagged_set <- flagged_set %>% mutate(code = "Unknown")
 
   # find xcms_peakgroups that have been multiply assigned

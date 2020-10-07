@@ -17,7 +17,7 @@ LOB_lpsolveAPI <- function(peakdata, choose_class = NULL, save.files = FALSE, us
   if (is.data.frame(peakdata)) {
     LOBpeaklist <- peakdata
   }else{
-    LOBpeaklist <- peakdata(peakdata)
+    LOBpeaklist <- LOBSTAHS::peakdata(peakdata)
   }
 
   if (is.null(LOBpeaklist$match_ID)) {

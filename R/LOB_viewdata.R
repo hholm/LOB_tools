@@ -13,7 +13,7 @@ LOB_viewdata <- function(peakdata, rawSpec = NULL){
   if (is.data.frame(peakdata)) {
     run <- peakdata
   }else{
-    run <- peakdata(peakdata)
+    run <- LOBSTAHS::peakdata(peakdata)
   }
 
 
