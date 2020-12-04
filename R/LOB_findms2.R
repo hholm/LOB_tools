@@ -55,7 +55,7 @@ LOB_findMS2 <- function(rawSpec, data = NULL, mz, rt, rtspan = 175, ppm = 100) {
     if (nrow(ms2matchs) > 0) {
       for (j in 1:nrow(ms2matchs)) {
         ms2matchs[j, "file"] <- rawSpec@featureData@data[row.names(ms2matchs[j, ]), "fileIdx"]
-        ms2matchs[j, "file"] <- sampleNames(rawSpec)[as.numeric(ms2matchs[j, "file"])]
+        ms2matchs[j, "file"] <- MSnbase::sampleNames(rawSpec)[as.numeric(ms2matchs[j, "file"])]
       }
     }
 
