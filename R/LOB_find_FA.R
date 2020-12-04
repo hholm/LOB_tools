@@ -13,13 +13,25 @@ LOB_find_FA <- function(rawSpec, data = NULL, mz, rt, rtspan = 175, ppm_pre = 10
   # Find the file with the most scans for each lipid
   most <- lapply(
     scans,
-    function(x) {
+    function(x) { if(class(x)!="data.frame"){
+      "No ms2 spectra found."
+    }else{
       names(which(table(x$file) == max(table(x$file))))
     }
+      }
   )
 
   # plot ms1 chromatogram of lipid
   for (i in 1:length(scans)) {
+    cat("\n")
+    flush.console()
+    cat("Plotting spectra", i, "of", length(scans), "...")
+
+    if(class(scans[[i]])!="data.frame"){
+      cat("\n")
+      cat("No ms2 spectra found for mass/lipid",names(scans[i]),"... Moving to next lipid.")
+    }else{
+
     if (!is.null(data)) {
       mz <- data[i, "LOBdbase_mz"]
       rt <- data[i, "peakgroup_rt"]
@@ -57,5 +69,6 @@ LOB_find_FA <- function(rawSpec, data = NULL, mz, rt, rtspan = 175, ppm_pre = 10
         ggtitle(as.character(paste("Lipid Name =", names(scans[i]))), subtitle = paste(" M/Z = ", mz, " File = ", most[[i]][1])),
         spec + geom_text(aes(label = round(mtc,2),y = i),vjust = -0.5)
     )
+    }
   }
 }
