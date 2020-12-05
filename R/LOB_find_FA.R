@@ -1,4 +1,4 @@
-LOB_find_FA <- function(rawSpec, data = NULL, mz, rt, rtspan = 175, ppm_pre = 100, ppm = 5) {
+LOB_plotMS2 <- function(rawSpec, peakdata = NULL, mz, rt, rtspan = 175, ppm_pre = 100, ppm = 2.5) {
 
   # Find MS2 spectra scans for lipids
   scans <- LOB_findMS2(
@@ -23,9 +23,11 @@ LOB_find_FA <- function(rawSpec, data = NULL, mz, rt, rtspan = 175, ppm_pre = 10
 
   # plot ms1 chromatogram of lipid
   for (i in 1:length(scans)) {
+    cat("\n") #for console feedback
     flush.console()
     cat("Plotting spectra", i, "of", length(scans), "...")
 
+    if(class(scans[[i]])!="data.frame"){ #Dont plot if no scans were found
       cat("\n")
       cat("No ms2 spectra found for mass/lipid",names(scans[i]),"... Moving to next lipid.")
     }else{
