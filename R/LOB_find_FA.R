@@ -1,7 +1,7 @@
 LOB_find_FA <- function(rawSpec, data = NULL, mz, rt, rtspan = 175, ppm_pre = 100, ppm = 5) {
 
   # Find MS2 spectra scans for lipids
-  scans <- LOBtools::LOB_findMS2(
+  scans <- LOB_findMS2(
     rawSpec = rawSpec,
     data = data,
     mz = mz,
@@ -51,6 +51,8 @@ LOB_find_FA <- function(rawSpec, data = NULL, mz, rt, rtspan = 175, ppm_pre = 10
 
     df <- chromatogram(plot)
 
+    df[[1]]@intensity[which(is.na(df[[1]]@intensity))] <- 0
+
     nulldev()
     spec <- plot(rawSpec_ms2[[closest_scan]])
     dev.off()
@@ -71,4 +73,5 @@ LOB_find_FA <- function(rawSpec, data = NULL, mz, rt, rtspan = 175, ppm_pre = 10
     )
     }
   }
+  return(scans)
 }
