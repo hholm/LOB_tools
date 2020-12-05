@@ -1,4 +1,4 @@
-LOB_find_FA <- function(rawSpec, data = NULL, mz, rt, rtspan = 175, ppm_pre = 100, ppm = 5) {
+LOB_plotMS2 <- function(rawSpec, peakdata = NULL, mz, rt, rtspan = 175, ppm_pre = 100, ppm = 2.5) {
 
   # Find MS2 spectra scans for lipids
   scans <- LOBtools::LOB_findMS2(
@@ -23,37 +23,45 @@ LOB_find_FA <- function(rawSpec, data = NULL, mz, rt, rtspan = 175, ppm_pre = 10
 
   # plot ms1 chromatogram of lipid
   for (i in 1:length(scans)) {
-    cat("\n")
+    cat("\n") #for console feedback
     flush.console()
     cat("Plotting spectra", i, "of", length(scans), "...")
 
-    if(class(scans[[i]])!="data.frame"){
+    if(class(scans[[i]])!="data.frame"){ #Dont plot if no scans were found
       cat("\n")
       cat("No ms2 spectra found for mass/lipid",names(scans[i]),"... Moving to next lipid.")
     }else{
 
-    if (!is.null(data)) {
+    if (!is.null(data)) { #if using a peaklist, set the terms. if not ignore
       mz <- data[i, "LOBdbase_mz"]
       rt <- data[i, "peakgroup_rt"]
     }
 
-    mzrange <- mz * (0.000001 * ppm)
+    mzrange <- mz * (0.000001 * ppm) # calculate mz range for filtering chrom
     mzlow <- (mz - mzrange)
     mzhigh <- (mz + mzrange)
 
-    plot <- rawSpec %>%
-      filterFile(file = most[[i]][1]) %>%
-      # filterRt(rt = c(rt-rtspan,rt+rtspan)) %>%
-      filterMz(mz = c(mzlow, mzhigh), msLevel = 1)
-
+    plot <- xcms::filterMz( #filter to only to the one file with the most scans and correct mz range
+      xcms::filterFile(rawSpec,
+        file = most[[i]][1]
+      ),
+      mz = c(mzlow, mzhigh),
+      msLevel = 1
+    )
+    #find the file with the most ms2 scans
     plot_scans <- scans[[i]][which(scans[[i]]$file == most[[i]][1]), ]
+
+    #find the name of the scan in this file that is closest too the center of the rt provided
     closest_scan <- rownames(plot_scans[which(abs(plot_scans$retention - rt) == min(abs(plot_scans$retention - rt))), ])
 
+    #extract a chromatogram from our filtered XCMSnexp object
     df <- chromatogram(plot)
 
-    nulldev()
-    spec <- plot(rawSpec_ms2[[closest_scan]])
+    temp <- tempfile() #create temp file to supress plotting the spectra
+    png(filename=temp)
+    spec <- plot(rawSpec_ms2[[closest_scan]]) #spectra for the closest scan
     dev.off()
+    unlink(temp)
 
     gridExtra::grid.arrange(
       ggplot() +
