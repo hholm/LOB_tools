@@ -97,13 +97,28 @@ LOB_plotMS2 <- function(rawSpec, peakdata = NULL, mz = NULL, rt = NULL, rtspan =
       df[[1]]@intensity[which(is.na(df[[1]]@intensity))] <- 0
 
 
-      temp <- tempfile() # create temp file to supress plotting the spectra
+      temp <- tempfile() # create temp file to suppress plotting the spectra
       png(filename = temp)
       spec <- plot(rawSpec_ms2[[closest_scan]]) # spectra for the closest scan
       dev.off()
-      unlink(temp)
-
-      gridExtra::grid.arrange(
+      unlink(temp) # delete file
+      
+      splits <- c(seq(min(spec$data$mtc),max(spec$data$mtc),by = 10),max(spec$data$mtc)) #create a vector to split up the MS2 spectra by mz
+      
+      bincode <- as.character(cut(spec$data$mtc,breaks = splits,include.lowest = TRUE)) #create these bins
+      
+      i_plot <- rep(NA,length(spec$data$i)) #NA vector
+      
+      suppressWarnings( # find the highest ms2 peak every ~10 m/z and mark that for plotting with a number
+      for (i in 1:length(unique(bincode))) {
+        bin <- unique(bincode)[i]
+        sub <- spec$data$i[which(bincode == bin)]
+        i_plot[which(spec$data$i == sub[which(sub == max(sub))])] <- sub[which(sub == max(sub))]
+      })
+      
+      i_plot[which(i_plot == 0)] <- NA #if a bin was all 0s make sure they are NA so they dont plot
+      
+      gridExtra::grid.arrange( #plot both graphs
         ggplot() +
           geom_line(aes(
             x = df[[1]]@rtime,
@@ -115,7 +130,7 @@ LOB_plotMS2 <- function(rawSpec, peakdata = NULL, mz = NULL, rt = NULL, rtspan =
           geom_vline(aes(xintercept = c(rt + rtspan, rt - rtspan)), color = "green", alpha = 0.75) +
           geom_vline(aes(xintercept = plot_scans[which(abs(plot_scans$retention - rt) == min(abs(plot_scans$retention - rt))), "retention"]), color = "red") +
           ggtitle(as.character(paste("Lipid Name =", names(scans[i]))), subtitle = paste(" M/Z = ", mz, " File = ", most[[i]][1])),
-        spec + geom_text(aes(label = round(mtc, 2), y = i), vjust = -0.5)
+        spec + geom_text(aes(label = round(mtc, 2), y = i_plot), vjust = -0.5)
       )
     }
   }
