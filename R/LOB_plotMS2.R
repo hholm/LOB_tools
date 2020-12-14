@@ -52,7 +52,7 @@ LOB_plotMS2 <- function(rawSpec, peakdata = NULL, mz = NULL, rt = NULL, rtspan =
       if (scans[[j]] == "No ms2 spectra found.") {
         most[j] <- "No ms2 spectra found."
       } else {
-        most[j] <- colnames(peakdata[, samples][, unique(scans[[2]]$file)])[which(x == max(x))]
+        most[j] <- colnames(peakdata[, samples][, unique(scans[[j]]$file)])[which(x == max(x))]
       }
     }
   }
@@ -82,7 +82,7 @@ LOB_plotMS2 <- function(rawSpec, peakdata = NULL, mz = NULL, rt = NULL, rtspan =
             file = most[[i]][1]
           ),
           mz = c(mzlow, mzhigh)
-        ),
+          ),
         msLevel = 1
       )
 
@@ -110,8 +110,8 @@ LOB_plotMS2 <- function(rawSpec, peakdata = NULL, mz = NULL, rt = NULL, rtspan =
       i_plot <- rep(NA, length(spec$data$i)) # NA vector
 
       suppressWarnings( # find the highest ms2 peak every ~10 m/z and mark that for plotting with a number
-        for (j in 1:length(unique(bincode))) {
-          bin <- unique(bincode)[j]
+        for (k in 1:length(unique(bincode))) {
+          bin <- unique(bincode)[k]
           sub <- spec$data$i[which(bincode == bin)]
           i_plot[which(spec$data$i == sub[which(sub == max(sub))])] <- sub[which(sub == max(sub))]
         }
