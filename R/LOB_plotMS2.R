@@ -38,7 +38,7 @@ LOB_plotMS2 <- function(rawSpec, peakdata = NULL, mz = NULL, rt = NULL, rtspan =
   # Find MS2 spectra scans for lipids
   scans <- LOB_findMS2(
     rawSpec = rawSpec,
-    data = peakdata,
+    peakdata = peakdata,
     mz = mz,
     rt = rt,
     rtspan = rtspan,
@@ -104,20 +104,36 @@ LOB_plotMS2 <- function(rawSpec, peakdata = NULL, mz = NULL, rt = NULL, rtspan =
       plot_scans <- scans[[i]][which(scans[[i]]$file == most[[i]][1]), ]
 
       # find the name of the scan in this file that is closest too the center of the rt provided
-      closest_scan <- rownames(plot_scans[which(abs(plot_scans$retention - rt) == min(abs(plot_scans$retention - rt))), ])
+      closest_scan <- rownames(plot_scans[which(abs(plot_scans$retentionTime - rt) == min(abs(plot_scans$retentionTime - rt))), ])
 
       # extract a chromatogram from our filtered XCMSnexp object and set non detected ion intensities to 0 for ploting
       df <- xcms::chromatogram(plot)
       df[[1]]@intensity[which(is.na(df[[1]]@intensity))] <- 0
 
 
-      temp <- tempfile() # create temp file to supress plotting the spectra
+      temp <- tempfile() # create temp file to suppress plotting the spectra
       png(filename = temp)
       spec <- plot(rawSpec_ms2[[closest_scan]]) # spectra for the closest scan
       dev.off()
-      unlink(temp)
+      unlink(temp) # delete file
 
-      gridExtra::grid.arrange(
+      splits <- c(seq(min(spec$data$mtc), max(spec$data$mtc), by = 10), max(spec$data$mtc)) # create a vector to split up the MS2 spectra by mz
+
+      bincode <- as.character(cut(spec$data$mtc, breaks = splits, include.lowest = TRUE)) # create these bins
+
+      i_plot <- rep(NA, length(spec$data$i)) # NA vector
+
+      suppressWarnings( # find the highest ms2 peak every ~10 m/z and mark that for plotting with a number
+        for (j in 1:length(unique(bincode))) {
+          bin <- unique(bincode)[j]
+          sub <- spec$data$i[which(bincode == bin)]
+          i_plot[which(spec$data$i == sub[which(sub == max(sub))])] <- sub[which(sub == max(sub))]
+        }
+      )
+
+      i_plot[which(i_plot == 0)] <- NA # if a bin was all 0s make sure they are NA so they dont plot
+
+      gridExtra::grid.arrange( # plot both graphs
         ggplot() +
           geom_line(aes(
             x = df[[1]]@rtime,
@@ -125,11 +141,11 @@ LOB_plotMS2 <- function(rawSpec, peakdata = NULL, mz = NULL, rt = NULL, rtspan =
           )) +
           xlab("Retention Time") +
           ylab("Intensity") +
-          geom_vline(aes(xintercept = plot_scans$retention), color = "blue", alpha = 0.5) +
+          geom_vline(aes(xintercept = plot_scans$retentionTime), color = "blue", alpha = 0.5) +
           geom_vline(aes(xintercept = c(rt + rtspan, rt - rtspan)), color = "green", alpha = 0.75) +
-          geom_vline(aes(xintercept = plot_scans[which(abs(plot_scans$retention - rt) == min(abs(plot_scans$retention - rt))), "retention"]), color = "red") +
+          geom_vline(aes(xintercept = plot_scans[closest_scan,"retentionTime"]), color = "red") +
           ggtitle(as.character(paste("Lipid Name =", names(scans[i]))), subtitle = paste(" M/Z = ", mz, " File = ", most[[i]][1])),
-        spec + geom_text(aes(label = round(mtc, 2), y = i), vjust = -0.5)
+        spec + geom_text(aes(label = round(mtc, 2), y = i_plot), vjust = -0.5)
       )
     }
   }
