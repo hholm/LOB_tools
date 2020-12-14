@@ -1,7 +1,19 @@
 LOB_plotMS2 <- function(rawSpec, peakdata = NULL, mz = NULL, rt = NULL, rtspan = 175,
                         ppm_pre = 100, ppm = 2.5, samples = NULL, plot_type = "most_scans") {
 
+  # Add check for samples input when using a df and 'highest_int'
+
   # check inputs
+  if(!(plot_type %in% c("most_scans","highest_int"))){
+    stop("Input 'plot_type' not recognized. Must be charactor vector reading either 'most_scans' or 'highest_int'.")
+  }
+
+  if(plot_type == "highest_int" & class(peakdata) == "data.frame"){
+    if(is.null(samples)){
+      stop("Attempting to plot MS2 for sample with the highest intensity but 'samples' input is empty. Please indicate which columns of your 'peakdata' input are samples with a numeric vector in the samples input.")
+    }
+  }
+
   if (!is.null(peakdata)) { # if peakdata isnt NULL
     if (class(peakdata) == "LOBset") { # and it is a LOBset
       peakdata <- LOBSTAHS::peakdata(peakdata) # extract the peakdata.
@@ -48,11 +60,13 @@ LOB_plotMS2 <- function(rawSpec, peakdata = NULL, mz = NULL, rt = NULL, rtspan =
   }
 
   if (plot_type == "highest_int") {
+    lipid <- peakdata[, samples]
+    most <- list()
     for (j in 1:length(scans)) {
-      if (scans[[j]] == "No ms2 spectra found.") {
+      if (class(scans[[j]]) != "data.frame") {
         most[j] <- "No ms2 spectra found."
       } else {
-        most[j] <- colnames(peakdata[, samples][, unique(scans[[2]]$file)])[which(x == max(x))]
+        most[j] <- unique(scans[[j]]$file)[which(lipid[j,unique(scans[[j]]$file)] == max(lipid[j,unique(scans[[j]]$file)]))]
       }
     }
   }
