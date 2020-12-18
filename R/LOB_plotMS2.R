@@ -1,11 +1,11 @@
 LOB_plotMS2 <- function(rawSpec, peakdata = NULL, mz = NULL, rt = NULL, rtspan = 175,
-                        ppm_pre = 100, ppm = 2.5, samples = NULL, plot_type = "most_scans") {
+                        ppm_pre = 100, ppm = 2.5, samples = NULL, plot_type = "most_scans",file = NULL) {
 
   # Add check for samples input when using a df and 'highest_int'
 
   # check inputs
-  if(!(plot_type %in% c("most_scans","highest_int"))){
-    stop("Input 'plot_type' not recognized. Must be charactor vector reading either 'most_scans' or 'highest_int'.")
+  if(!(plot_type %in% c("most_scans","highest_int","file"))){
+    stop("Input 'plot_type' not recognized. Must be charactor vector reading either 'most_scans','highest_int', or 'file'")
   }
 
   if(plot_type == "highest_int" & class(peakdata) == "data.frame"){
@@ -70,6 +70,10 @@ LOB_plotMS2 <- function(rawSpec, peakdata = NULL, mz = NULL, rt = NULL, rtspan =
       }
     }
   }
+  
+  if(plot_type == 'file'){
+    most <- rep(file,length(scans))
+  }
 
   # plot ms1 chromatogram of lipid
   for (i in 1:length(scans)) {
@@ -81,6 +85,12 @@ LOB_plotMS2 <- function(rawSpec, peakdata = NULL, mz = NULL, rt = NULL, rtspan =
       cat("\n")
       cat("No ms2 spectra found for mass/lipid", names(scans[i]), "... Moving to next lipid.")
     } else {
+      
+      if (!(most[[i]][1] %in% scans[[i]]$file)) {
+        cat("No ms2 spectra found for mass/lipid", names(scans[i]), "in file specified... Moving to next lipid.")
+        next
+      }
+      
       if (!is.null(peakdata)) { # if using a peaklist, set the terms. if not ignore
         mz <- peakdata[i, "LOBdbase_mz"]
         rt <- peakdata[i, "peakgroup_rt"]
