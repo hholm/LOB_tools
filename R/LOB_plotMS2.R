@@ -1,16 +1,21 @@
-LOB_plotMS2 <- function(rawSpec, peakdata = NULL, mz = NULL, rt = NULL, rtspan = 175,
-                        ppm_pre = 100, ppm = 2.5, samples = NULL, plot_type = "most_scans",file = NULL) {
+LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_type = "most_scans", mz = NULL, rt = NULL, rtspan = 175,
+                        ppm_pre = 100, ppm = 2.5, file = NULL, window = 1, diagnostic = NULL,diagnostic_ppm = 20) {
 
   # Add check for samples input when using a df and 'highest_int'
 
   # check inputs
-  if(!(plot_type %in% c("most_scans","highest_int","file"))){
-    stop("Input 'plot_type' not recognized. Must be charactor vector reading either 'most_scans','highest_int', or 'file'")
+  if (window < 1) {
+    stop("Window can not be less than 1 (Full rt window searched for scans).")
   }
 
-  if(plot_type == "highest_int" & class(peakdata) == "data.frame"){
-    if(is.null(samples)){
-      stop("Attempting to plot MS2 for sample with the highest intensity but 'samples' input is empty. Please indicate which columns of your 'peakdata' input are samples with a numeric vector in the samples input.")
+  if (is.null(file)) {
+    if (!(plot_type %in% c("most_scans", "highest_int"))) {
+      stop("Input 'plot_type' not recognized. Must be charactor vector reading either
+         'most_scans' or 'highest_int' if 'file' input is not specified")
+    }
+  } else {
+    if (any(!file %in% sampleNames(XCMSnExp))) {
+      stop("File(s) '", paste(file[which(!file %in% sampleNames(XCMSnExp))],collapse = ", "),"' not found in XCMSnExp. Check sampleNames(XCMSnExp) to see files in object.")
     }
   }
 
@@ -35,44 +40,66 @@ LOB_plotMS2 <- function(rawSpec, peakdata = NULL, mz = NULL, rt = NULL, rtspan =
     rt <- NULL
   }
 
+
+if (!is.null(diagnostic)) { # calculate diagnostic mz ranges
+  drange <- lapply(diagnostic, function(x) {
+    range <- x * (0.000001 * diagnostic_ppm) # calculate mz range for filtering chrom
+    low <- (x - mzrange)
+    high <- (x + mzrange)
+    c(low,high)
+  })
+}
+
   # Find MS2 spectra scans for lipids
   scans <- LOB_findMS2(
-    rawSpec = rawSpec,
+    XCMSnExp = XCMSnExp,
     peakdata = peakdata,
     mz = mz,
     rt = rt,
     rtspan = rtspan,
-    ppm = ppm_pre
+    ppm_pre = ppm_pre
   )
 
-  if (plot_type == "most_scans") {
-    # Find the file with the most scans for each lipid
+  # if-then statments too select file to plot scans from
+  if (!is.null(file)) { # check if user specified a file
     most <- lapply(
       scans,
       function(x) {
         if (class(x) != "data.frame") {
           "No ms2 spectra found."
         } else {
-          names(which(table(x$file) == max(table(x$file))))
+          file
         }
       }
     )
-  }
-
-  if (plot_type == "highest_int") {
-    lipid <- peakdata[, samples]
-    most <- list()
-    for (j in 1:length(scans)) {
-      if (class(scans[[j]]) != "data.frame") {
-        most[j] <- "No ms2 spectra found."
-      } else {
-        most[j] <- unique(scans[[j]]$file)[which(lipid[j,unique(scans[[j]]$file)] == max(lipid[j,unique(scans[[j]]$file)]))]
-      }
+  } else {
+    if (plot_type == "most_scans") {
+      # Find the file with the most scans for each lipid
+      most <- lapply(
+        scans,
+        function(x) {
+          if (class(x) != "data.frame") {
+            "No ms2 spectra found."
+          } else {
+            names(which(table(x$file) == max(table(x$file))))[1]
+          }
+        }
+      )
     }
-  }
-  
-  if(plot_type == 'file'){
-    most <- rep(file,length(scans))
+
+    if (plot_type == "highest_int") {
+      # Find the file with the highest precursor int for each lipid
+      most <- lapply(
+        scans,
+        function(x) {
+          if (class(x) != "data.frame") {
+            "No ms2 spectra found."
+          } else {
+            x[which(x$precursorIntensity == max(x$precursorIntensity)), "file"][1]
+          }
+        }
+      )
+    }
   }
 
   # plot ms1 chromatogram of lipid
@@ -85,12 +112,13 @@ LOB_plotMS2 <- function(rawSpec, peakdata = NULL, mz = NULL, rt = NULL, rtspan =
       cat("\n")
       cat("No ms2 spectra found for mass/lipid", names(scans[i]), "... Moving to next lipid.")
     } else {
-      
-      if (!(most[[i]][1] %in% scans[[i]]$file)) {
+      for (z in 1:length(most[[i]])) {
+      if (!(most[[i]][z] %in% scans[[i]]$file)) {
+        cat("\n")
         cat("No ms2 spectra found for mass/lipid", names(scans[i]), "in file specified... Moving to next lipid.")
         next
       }
-      
+
       if (!is.null(peakdata)) { # if using a peaklist, set the terms. if not ignore
         mz <- peakdata[i, "LOBdbase_mz"]
         rt <- peakdata[i, "peakgroup_rt"]
@@ -101,17 +129,17 @@ LOB_plotMS2 <- function(rawSpec, peakdata = NULL, mz = NULL, rt = NULL, rtspan =
       mzhigh <- (mz + mzrange)
 
       plot <- xcms::filterMsLevel(
-        filterMz( # filter to only to the one file with the most scans and correct mz range
-          xcms::filterFile(rawSpec,
-            file = most[[i]][1]
+        xcms::filterMz( # filter to only to the one file with the most scans and correct mz range
+          xcms::filterFile(XCMSnExp,
+            file = most[[i]][z]
           ),
           mz = c(mzlow, mzhigh)
-          ),
+        ),
         msLevel = 1
       )
 
       # get the scans IDs from the file with the most scans
-      plot_scans <- scans[[i]][which(scans[[i]]$file == most[[i]][1]), ]
+      plot_scans <- scans[[i]][which(scans[[i]]$file == most[[i]][z]), ]
 
       # find the name of the scan in this file that is closest too the center of the rt provided
       closest_scan <- rownames(plot_scans[which(abs(plot_scans$retentionTime - rt) == min(abs(plot_scans$retentionTime - rt))), ])
@@ -123,9 +151,14 @@ LOB_plotMS2 <- function(rawSpec, peakdata = NULL, mz = NULL, rt = NULL, rtspan =
 
       temp <- tempfile() # create temp file to suppress plotting the spectra
       png(filename = temp)
-      spec <- plot(rawSpec_ms2[[closest_scan]]) # spectra for the closest scan
+      spec <- plot(XCMSnExp[[closest_scan]]) # spectra for the closest scan
       dev.off()
       unlink(temp) # delete file
+
+      if(!is.null(diagnostic)){ # find fragments
+        which <- lapply(drange, function(x){which(spec$data$mtc > x[1] & spec$data$mtc < x[2])})
+        diff <- sapply(unlist(which),function(x){(spec$data$mtc[x]-diagnostic[names(which(which==x))][[1]])/(diagnostic[names(which(which==x))][[1]]*0.000001)})
+      }
 
       splits <- c(seq(min(spec$data$mtc), max(spec$data$mtc), by = 10), max(spec$data$mtc)) # create a vector to split up the MS2 spectra by mz
 
@@ -143,6 +176,12 @@ LOB_plotMS2 <- function(rawSpec, peakdata = NULL, mz = NULL, rt = NULL, rtspan =
 
       i_plot[which(i_plot == 0)] <- NA # if a bin was all 0s make sure they are NA so they dont plot
 
+      colors <- rep('black',length(i_plot)) # make colors for labels
+      if(!is.null(diagnostic)){ # make sure diagnostic fragments are plotted and in red
+          i_plot[unlist(which)] <- spec$data$i[unlist(which)]
+          colors[unlist(which)] <- 'red'
+        }
+
       gridExtra::grid.arrange( # plot both graphs
         ggplot() +
           geom_line(aes(
@@ -151,13 +190,18 @@ LOB_plotMS2 <- function(rawSpec, peakdata = NULL, mz = NULL, rt = NULL, rtspan =
           )) +
           xlab("Retention Time") +
           ylab("Intensity") +
+          xlim(rt - rtspan*window, rt + rtspan*window) +
           geom_vline(aes(xintercept = plot_scans$retentionTime), color = "blue", alpha = 0.5) +
           geom_vline(aes(xintercept = c(rt + rtspan, rt - rtspan)), color = "green", alpha = 0.75) +
-          geom_vline(aes(xintercept = plot_scans[closest_scan,"retentionTime"]), color = "red") +
-          ggtitle(as.character(paste("Lipid Name =", names(scans[i]))), subtitle = paste(" M/Z = ", mz, " File = ", most[[i]][1])),
-        spec + geom_text(aes(label = round(mtc, 2), y = i_plot), vjust = -0.5)
+          geom_vline(aes(xintercept = plot_scans[closest_scan, "retentionTime"]), color = "red") +
+          ggtitle(as.character(paste("Lipid Name =", names(scans[i]))), subtitle = paste(" M/Z = ", mz, " File = ", most[[i]][z])),
+          spec +
+          geom_text(aes(label = round(mtc, 2), y = i_plot),color = colors, vjust = -0.5) +
+          ggplot2::annotate(geom = "text",label = paste("Fragments\n",paste(names(diff),"=",round(diff,digits = 5),collapse = "\n")),x = Inf,y = Inf,hjust = 1,vjust = 1)
       )
+      }
     }
   }
+  cat("\n\n")
   return(scans)
 }
