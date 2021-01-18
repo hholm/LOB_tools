@@ -1,7 +1,7 @@
-# Use to find possible MS2 from a RawSpec File. Returns a table of scans with file names.
+# Use to find possible MS2 from a XCMSnExp File. Returns a table of scans with file names.
 # Rt is a range in seconds
 
-LOB_findMS2 <- function(rawSpec, peakdata = NULL, mz, rt, rtspan = 175, ppm = 100) {
+LOB_findMS2 <- function(XCMSnExp, peakdata = NULL, mz, rt, rtspan = 175, ppm_pre = 100) {
 
   # Test if the data is entered in a dataframe (data argument) or with mz, rt, ect arguments.
   # Reformate info into temp 'run' df and list of compounds to search for
@@ -22,9 +22,9 @@ LOB_findMS2 <- function(rawSpec, peakdata = NULL, mz, rt, rtspan = 175, ppm = 10
 
   cat("Loading data...")
   cat("\n")
-  # Extract the MS2 spectra info from the rawspec object and store it in a dataframe
-  ms1 <- filterMsLevel(rawSpec, msLevel = 2)@featureData@data[, c("fileIdx", "precursorMZ", "retentionTime")]
-  samples <- MSnbase::sampleNames(rawSpec)
+  # Extract the MS2 spectra info from the XCMSnExp object and store it in a dataframe
+  ms1 <- xcms::filterMsLevel(XCMSnExp, msLevel = 2)@featureData@data[, c("fileIdx", "precursorMZ", "retentionTime",'precursorIntensity')]
+  samples <- MSnbase::sampleNames(XCMSnExp)
   ms1$file <- sapply(ms1$fileIdx, function(x) {
     samples[x]
   })
@@ -43,7 +43,7 @@ LOB_findMS2 <- function(rawSpec, peakdata = NULL, mz, rt, rtspan = 175, ppm = 10
     mz <- run[i, 1]
     rt <- run[i, 2]
 
-    mzrange <- mz * (0.000001 * ppm)
+    mzrange <- mz * (0.000001 * ppm_pre)
     mzlow <- (mz - mzrange)
     mzhigh <- (mz + mzrange)
 
