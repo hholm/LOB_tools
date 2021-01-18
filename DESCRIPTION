@@ -5,6 +5,8 @@ Authors@R: c(
 	person("Henry", "Holm", email = "hholm@whoi.edu", 
            role = c("aut","cre")),
 	person("Dan", "Lowenstien", email = "patton.lowenstein@gmail.com", 
+           role = c("aut")),
+	person("Max", "Jahns", email = "mjahns@whoi.edu", 
            role = c("aut"))
 	)
 Description: In Development Screening tools for LOBSTAHs that will hopefully be part of that package soon.

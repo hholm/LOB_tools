@@ -4,6 +4,7 @@ LOB_viewdata <- function(peakdata, rawSpec = NULL){
   #library(shiny)
   #library(tidyverse)
   #library(RColorBrewer)
+  #library(ggplot2)
 
   if (!class(peakdata) %in% c("data.frame","LOBSet")) {
     stop("Input peakdata is neither a 'data.frame' nor 'LOBSet'.")
