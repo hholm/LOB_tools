@@ -84,6 +84,18 @@ LOB_viewdata <- function(peakdata, rawSpec = NULL){
           )),
 
         tabPanel(
+          plotOutput('ms2'),
+          title = "Chromatogram and MS2",
+          column(4,
+                 selectInput('species', 'Select Species', c("All",as.character(unique(run$species))),multiple = FALSE),
+                 selectInput('xaxis', 'X_Variable', c('None','Carbon','Double Bonds','lpSolve Fitted','Lipid Class'), selected = 'Carbon'),
+                 selectInput('fill_colors', 'Fill_Colors', c('Carbon', 'Double Bonds', 'Species'))
+          ),
+          column(4,
+                 selectInput('flag', "Flag?", c("All", as.character(unique(run$Flag))), multiple = TRUE, selected = "All"))
+
+        ),
+        tabPanel(
           plotOutput('bar'),
           title = "Distributions",
           column(4,
@@ -105,7 +117,7 @@ LOB_viewdata <- function(peakdata, rawSpec = NULL){
       #Set object as NULL to prevent crashing
       run_table <- NULL
 
-      # Will update as varibles change
+      # Will update as variables change
       output$plot <- renderPlot({
 
         data <- run #so we dont change our intial data
@@ -282,10 +294,10 @@ LOB_viewdata <- function(peakdata, rawSpec = NULL){
             }else{
               output$no_sel <- renderText(
                 paste("Searching for ms2 data for mass",as.character(run_table$LOBdbase_mz),"... please wait."))
-              ms2 <- LOB_findMS2(rawSpec = rawSpec,
+              ms2 <- LOB_findMS2(XCMSnExp = rawSpec,
                                  mz = run_table$LOBdbase_mz,
                                  rt = run_table$peakgroup_rt,
-                                 ppm = input$ppm,
+                                 ppm_pre = input$ppm,
                                  rtspan = input$rtspan)
               output$ms2_table <- renderTable({
                 ms2[[1]]
