@@ -201,6 +201,7 @@ LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_type = "most_scans", mz 
             ggtitle(as.character(paste("Lipid Name =", names(scans[i]))), subtitle = paste(" M/Z = ", mz, " File = ", most[[i]][z])),
           spec +
             geom_text(aes(label = round(mtc, 2), y = i_plot), color = colors, vjust = -0.5) +
+            ggtitle(paste(spec$labels$title,"; Collision Energy",XCMSnExp[[closest_scan]]@collisionEnergy,"; Retention Time",XCMSnExp[[closest_scan]]@rt,"sec")) +
             if (!is.null(diagnostic)) {
               if (length(diff) > 0) {
                 ggplot2::annotate(geom = "text", label = paste("Fragments\n", paste(names(diff), "=", round(diff, digits = 5), collapse = "\n")), x = Inf, y = Inf, hjust = 1, vjust = 1)
