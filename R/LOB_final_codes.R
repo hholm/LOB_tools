@@ -16,7 +16,7 @@ LOB_final_codes <- function(peakdata){
   }
 
   #library(tidyverse)
-  flagged_set <- flagged_set %>% mutate(code = "Unknown")
+  flagged_set <- flagged_set %>% dplyr::mutate(code = "Unknown")
 
   # find xcms_peakgroups that have been multiply assigned
   split_by_peakgroup <- split(flagged_set,
@@ -108,9 +108,7 @@ LOB_final_codes <- function(peakdata){
   cat("Done!")
   cat("\n")
   cat("Summarizing adduct info...")
-  flagged_set[which(flagged_set$C2a == 1),"adduct_summary"] <- "Completely_satisfied"
-  flagged_set[which(flagged_set$C2b == 1),"adduct_summary"] <- "Somewhat_satisfied"
-  flagged_set[which(flagged_set$C1 == 1),"adduct_summary"] <- "No_other_adducts"
+  flagged_set <- LOBtools::LOB_adduct_summary(flagged_set)
   cat("Done!")
 
   #Adding a column to indicate whether isomers have been resolved
