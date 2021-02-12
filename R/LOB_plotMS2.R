@@ -1,8 +1,6 @@
 LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_type = "most_scans", mz = NULL, rt = NULL, rtspan = 175,
                         ppm_pre = 100, ppm = 2.5, file = NULL, window = 1, diagnostic = NULL, diagnostic_ppm = 20, NL = NULL) {
 
-  # Add check for samples input when using a df and 'highest_int'
-
   # check inputs
   if (window < 1) {
     stop("Window can not be less than 1 (Full rt window searched for scans).")
