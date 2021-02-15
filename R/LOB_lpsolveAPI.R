@@ -1,4 +1,4 @@
-LOB_lpsolveAPI <- function(peakdata, choose_class = NULL, save.files = FALSE, use_ms2 = TRUE, plot_data = TRUE, use_weight = TRUE, hijacking = FALSE) {
+LOB_lpsolveAPI <- function(peakdata, choose_class = NULL, save.files = FALSE, use_ms2 = TRUE, plot_data = FALSE, use_weight = TRUE, hijacking = FALSE) {
   #library(lpSolveAPI)
   #library(dplyr)
   #library(ggplot2)
@@ -83,8 +83,8 @@ LOB_lpsolveAPI <- function(peakdata, choose_class = NULL, save.files = FALSE, us
     # run <-run[run$match_ID %in% LOBpeaklist$match_ID,]
 
     print(ggplot(X, aes(x = peakgroup_rt, y = LOBdbase_mz, color = lpSolve)) +
-            scale_color_manual(values = c("Maybe" = "#e7cd08", "No" = "#e70808", "Yes" = "#08e799")) +
-            geom_point() +
+            scale_color_manual(values = c("Maybe" = "#fdbd4c", "No" = "#e55934", "Yes" = "#9bc53d")) +
+            geom_point(size = 3) +
             geom_text(
               label = paste0(
                 as.character(X$FA_total_no_C), ":",
@@ -95,7 +95,7 @@ LOB_lpsolveAPI <- function(peakdata, choose_class = NULL, save.files = FALSE, us
               size = 3,
               color = "black"
             ) +
-            ggtitle(paste0("lpSolve Screened Data - ", as.character(X$species), "-", extra)) +
+            ggtitle(paste0("Rt Pattern Screening for ", as.character(X$species), "-", extra)) +
             xlab("Peak Group Retention Time (sec)") +
             ylab("Peak Group m/z"))
   }

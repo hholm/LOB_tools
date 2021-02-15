@@ -15,4 +15,5 @@ export("LOB_viewstandard",
        "LOB_lpsolve",
        "LOB_findMS2",
        "LOB_plotMS2",
-       "LOB_final_codes")
+       "LOB_final_codes",
+       "LOB_adduct_summary")

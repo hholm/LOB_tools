@@ -19,11 +19,11 @@ Depends:
     lpSolveAPI,
     shiny,
     ggplot2,
-    tidyr,
-    dplyr
+    tidyr
 Imports:
     MSnbase,
-    xcms
+    xcms,
+    dplyr
 
 
 

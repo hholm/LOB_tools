@@ -108,7 +108,7 @@ LOB_final_codes <- function(peakdata){
   cat("Done!")
   cat("\n")
   cat("Summarizing adduct info...")
-  flagged_set <- LOBtools::LOB_adduct_summary(flagged_set)
+  flagged_set <- LOB_adduct_summary(flagged_set)
   cat("Done!")
 
   #Adding a column to indicate whether isomers have been resolved
