@@ -1,5 +1,5 @@
 LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_type = "most_scans", mz = NULL, rt = NULL, rtspan = 175,
-                        ppm_pre = 100, ppm = 2.5, file = NULL, window = 1, diagnostic = NULL, diagnostic_ppm = 20, NL = NULL) {
+                        ppm_pre = 100, ppm = 2.5, file = NULL, window = 1, diagnostic = NULL, diagnostic_ppm = 15, NL = NULL) {
 
   # check inputs
   if (window < 1) {
@@ -24,7 +24,7 @@ LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_type = "most_scans", mz 
       if (class(peakdata) != "data.frame") { # it should be a data.frame
         stop("Input 'peakdata' must be of class 'data.frame'.")
       } else {
-        if (!all(c("peakgroup_rt", "LOBdbase_mz", "compound_name") %in% colnames(peakdata))) { # with three columns.
+        if (!all(c("peakgroup_rt", "LOBdbase_mz", "compound_name") %in% colnames(peakdata))) { # with at least three columns.
           stop("The input 'peakdata' must have columns 'peakgroup_rt', 'LOBdbase_mz', and 'compound_name'.")
         }
       }
@@ -46,11 +46,27 @@ LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_type = "most_scans", mz 
     c(low, high)
   }
 
-  if (!is.null(diagnostic)) { # calculate diagnostic mz ranges
+  if (!is.null(diagnostic)) {
+    if (is.null(names(diagnostic))){
+      stop("'diagnostic' must be a named numeric.")
+    }else{
+      if (anyDuplicated((names(diagnostic))) != 0) {
+        stop("'diagnostic' names must be unique")
+      }
+    }
+    # calculate diagnostic mz ranges
     drange <- lapply(diagnostic, range_calc)
   }
 
-  if (!is.null(NL)) { # calculate NL mz ranges
+  if (!is.null(NL)) {
+    if (is.null(names(NL))){
+      stop("'NL' must be a named numeric.")
+    }else{
+      if (anyDuplicated((names(NL))) != 0) {
+        stop("'NL' names must be unique.")
+      }
+    }
+    # calculate NL mz ranges
     nlrange <- lapply(NL, range_calc)
   }
 
@@ -207,6 +223,7 @@ LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_type = "most_scans", mz 
           colors[unlist(which_nl)] <- "green"
         }
 
+        diff_group <- c(diff,diff_nl)
         gridExtra::grid.arrange( # plot both graphs
   ggplot() +
     geom_line(aes(
@@ -228,9 +245,10 @@ LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_type = "most_scans", mz 
         geom = "text",
         label = paste(
           "Fragments\n",
-          paste(names(c(diff, diff_nl)), "=", if (length(diff_nl) > 0 | length(diff) > 0 ) {
-            round(c(diff, diff_nl), digits = 5)
-          }else{NULL}, collapse = "\n")
+          if(length(diff_group)>0){
+          paste(names(diff_group), "=",
+                round(unlist(diff_group), digits = 5),
+                collapse = "\n")}else{NULL}
         ), x = Inf, y = Inf, hjust = 1, vjust = 1
       )
     } else {

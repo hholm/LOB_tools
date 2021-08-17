@@ -56,9 +56,9 @@ LOB_viewdata <- function(peakdata, rawSpec = NULL){
                              step=10, round=1),
                  checkboxInput('y_auto', 'Auto Y-Axis',value = TRUE),
                  sliderInput('mz', 'Y-Axis Limits (m/z)',
-                             min=floor(min(run$LOBdbase_mz)),
-                             max=ceiling(max(run$LOBdbase_mz)),
-                             value = c(floor(min(run$LOBdbase_mz)),ceiling(max(run$LOBdbase_mz))),
+                             min=floor(min(run$LOBdbase_mz,na.rm = TRUE)),
+                             max=ceiling(max(run$LOBdbase_mz,na.rm = TRUE)),
+                             value = c(floor(min(run$LOBdbase_mz,na.rm = TRUE)),ceiling(max(run$LOBdbase_mz,na.rm = TRUE))),
                              step=10, round=1),
 
                  checkboxInput('text', 'Display Names'),
