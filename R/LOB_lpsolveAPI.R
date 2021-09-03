@@ -215,6 +215,7 @@ LOB_lpsolveAPI <- function(peakdata, choose_class = NULL, save.files = FALSE, us
       }
       set.objfn(lpmodel, run$weights)
 
+
       # find first solution
       status <- solve(lpmodel)
       sols <- matrix(ncol = num_points)
@@ -437,7 +438,8 @@ LOB_lpsolveAPI <- function(peakdata, choose_class = NULL, save.files = FALSE, us
         LOBrun$peakgroup_rt,
         LOBrun$FA_total_no_C,
         LOBrun$FA_total_no_DB,
-        LOBrun$species
+        LOBrun$species,
+        LOBrun$weights
       )
       # Re-name our column names
       colnames(PRErun) <- c(
@@ -447,7 +449,8 @@ LOB_lpsolveAPI <- function(peakdata, choose_class = NULL, save.files = FALSE, us
         "peakgroup_rt",
         "FA_total_no_C",
         "FA_total_no_DB",
-        "species"
+        "species",
+        'weights'
       )
     }
 

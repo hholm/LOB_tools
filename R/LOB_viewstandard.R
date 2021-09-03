@@ -220,7 +220,7 @@ LOB_viewstandard <- function(object){
         samplenames <- sampleNames(object)
 
         samplenamesframe <- data.frame(samplenames,samplenumber =
-                                         seq(from=1, to=length(mzXMLfiles)))
+                                         seq(from=1, to=length(sampleNames(object))))
 
         #create + extract a lists of peaks that fit our parameters
         peaks <- chromPeaks(object = object,

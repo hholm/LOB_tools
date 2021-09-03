@@ -12,7 +12,7 @@ LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_type = "most_scans", mz 
          'most_scans' or 'highest_int' if 'file' input is not specified")
     }
   } else {
-    if (any(!file %in% sampleNames(XCMSnExp))) {
+    if (any(!file %in% MSnbase::sampleNames(XCMSnExp))) {
       stop("File(s) '", paste(file[which(!file %in% sampleNames(XCMSnExp))], collapse = ", "), "' not found in XCMSnExp. Check sampleNames(XCMSnExp) to see files in object.")
     }
   }

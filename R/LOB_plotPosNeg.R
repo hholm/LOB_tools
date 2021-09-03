@@ -87,7 +87,6 @@ LOB_plotPosNeg <- function(XCMSnExp_pos, XCMSnExp_neg, peakdata_pos = NULL, addu
     df_pos[[1]]@intensity[which(is.na(df_pos[[1]]@intensity))] <- 0
     df_neg[[1]]@intensity[which(is.na(df_neg[[1]]@intensity))] <- 0
 
-    plot(
       gridExtra::grid.arrange( # plot both graphs
         ggplot() +
           geom_line(aes(
@@ -112,6 +111,5 @@ LOB_plotPosNeg <- function(XCMSnExp_pos, XCMSnExp_neg, peakdata_pos = NULL, addu
           ggtitle(as.character(paste("Lipid Name =", peakdata_pos[i, "compound_name"]," Mode = Negative")),
                   subtitle = paste(" M/Z = ", mz, " File = ", file[2]," PPM =",ppm))
       )
-    )
   }
 }
