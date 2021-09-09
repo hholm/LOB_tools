@@ -8,7 +8,8 @@
 # original_data <- read.csv("Nano_Intermediate_Third_Pos_Raw_LOBSTAHS_screened_peakdata_2019-06-18T2-27-43_PM-0400.csv")
 # RT_Factor_Dbase <-read.csv("C:/Users/TSQ/Desktop/Daniel Lowenstein/Older_Projects/RT_Factors/Hummel RtF Master Database - rtf_data.csv")
 
-LOB_RTFsort <- function(peakdata, RT_Factor_Dbase, standard = "DNPPE", choose_class = NULL, plot_data = FALSE, save_plots = FALSE, data_title) {
+LOB_RTFsort <- function(peakdata, RT_Factor_Dbase, standard = "DNPPE", choose_class = NULL,
+                        plot_data = FALSE, save_plots = FALSE, data_title) {
 
   # library(tidyr)
   # library(dplyr)
@@ -85,25 +86,52 @@ LOB_RTFsort <- function(peakdata, RT_Factor_Dbase, standard = "DNPPE", choose_cl
   # make sure peakgroup rt is numeric
   original_data$peakgroup_rt <- as.numeric(original_data$peakgroup_rt)
 
-  # Extract correct standard retention time
-  if (standard %in% original_data$compound_name) {
-    DNPPE_RT <- as.numeric(original_data$peakgroup_rt[which(grepl(standard, original_data$compound_name))])
-  } else {
-    stop("Input 'standard' not found in peakdata compound names. Check check the compound_name slot of peakdata for your standard.")
-  }
-
-  if (length(DNPPE_RT) > 1) {
+  if (length("standard") > 1) {
     stop(
-      "Looks like there's more than one peak in the dataset for your standard.",
-      "Please resolve in input LOBpeaklist and try again."
+      "Input 'standard' should only be one value. Screen using annotations using specific\n",
+      "standards by running the function multipule times, subsetting with 'choose_class'."
     )
   }
 
-  # Add column for DNPPE factor and an empty one for flagging
-  original_data <- original_data %>%
-    mutate(DNPPE_Factor = peakgroup_rt / DNPPE_RT, Flag = "None", DBase_DNPPE_RF = "NA") %>%
-    subset(species != "NA")
+  # Extract correct standard retention time
+  if (class(standard) == "character") {
+    if (standard %in% original_data$compound_name) {
+      std_rt <- as.numeric(original_data$peakgroup_rt[which(grepl(standard, original_data$compound_name))])
+    } else {
+      stop(
+        "Input 'standard' not found in peakdata compound names.\n",
+        "Check the compound_name slot of peakdata for your standard.\n",
+        "Alternatively, use a numeric vector in input 'standard' to select a standard by 'match_ID'"
+      )
+    }
+  }
 
+  if (class(standard) == "numeric") {
+    if (standard %in% original_data$match_ID) {
+      std_rt <- as.numeric(original_data$peakgroup_rt[which(grepl(standard, original_data$match_ID))])
+    } else {
+      stop(
+        "Input 'standard' not found in peakdata match IDs.\n",
+        "Check the match_ID slot of peakdata for your standard.\n",
+        "Alternatively, use a charactor vector in input 'standard' to select a standard by 'compound_name'"
+      )
+    }
+  }
+
+
+  if (length(std_rt) > 1) {
+    stop(
+      "Looks like there's more than one annotation in 'peakdata' for your standard.",
+      "Please enter the match_id of the annotation you would like to use in the 'standard' input."
+    )
+  }
+
+  # Add column for DNPPE factor and an empty one for flagging IF none exists
+  if (is.null(original_data$Flag)){
+  original_data <- original_data %>%
+    mutate(DNPPE_Factor = peakgroup_rt / std_rt, Flag = "None", DBase_std_RF = "NA") %>%
+    subset(species != "NA")
+}
   # isolate major intact polar lipid classes, unoxidized (need to add pigments, etc.)
   Main_Lipids <- original_data %>%
     subset(degree_oxidation == "0") %>%
@@ -148,7 +176,7 @@ LOB_RTFsort <- function(peakdata, RT_Factor_Dbase, standard = "DNPPE", choose_cl
   cat("\n")
   for (i in 1:length(Known_RtFs$compound_name)) {
     which_row <- as.numeric(which(grepl(paste0("^", Known_RtFs$compound_name[i], "$"), RT_Factor_Dbase$compound_name)))
-    Known_RtFs$DBase_DNPPE_RF[i] <- RT_Factor_Dbase$Mean_DNPPE_Factor[which_row]
+    Known_RtFs$DBase_std_RF[i] <- RT_Factor_Dbase$Mean_DNPPE_Factor[which_row]
 
     if (Known_RtFs$DNPPE_Factor[i] < (RT_Factor_Dbase$Mean_DNPPE_Factor[which_row] * 1.1) & Known_RtFs$DNPPE_Factor[i] > (RT_Factor_Dbase$Mean_DNPPE_Factor[which_row] * 0.9)) {
       if (Known_RtFs$DNPPE_Factor[i] < (RT_Factor_Dbase$Mean_DNPPE_Factor[which_row] * 1.05) & Known_RtFs$DNPPE_Factor[i] > (RT_Factor_Dbase$Mean_DNPPE_Factor[which_row] * 0.95)) {
@@ -191,73 +219,42 @@ LOB_RTFsort <- function(peakdata, RT_Factor_Dbase, standard = "DNPPE", choose_cl
   }
   cat("Done!")
 
-  # combine known and unknown dfs
-  Combined <- rbind(Known_RtFs, Unknown_RtFs)
-
   # change levels of colors so they plot in the right order
   # Combined$Flag = factor(Combined$Flag, levels = c("Red", "ms2v", "5%_rtv", "10%_rtv", "Unknown"))
 
   Flagged_Data <- original_data
-  Flagged_Data$Flag <- rep("Unknown", length(Flagged_Data$Flag))
 
+  #create new columns only if they don't exist to preserve existing data.
+  if(is.null(Flagged_Data$Flag)){ Flagged_Data$Flag <- rep("Unknown", length(Flagged_Data$Flag))}
+  if(is.null(Flagged_Data$Std_name_RF)){ Flagged_Data$Std_name_RF <- NA}
+  if(is.null(Flagged_Data$Std_rt_RF)){   Flagged_Data$Std_rt_RF <- NA}
+
+  #combine data
   cat("\n")
-  for (j in 1:length(Combined$match_ID)) {
-    match_row <- as.numeric(which(grepl(paste0("^", Combined$match_ID[j], "$"), Flagged_Data$match_ID)))
-    Flagged_Data$Flag[match_row] <- as.character(Combined$Flag[j])
-    Flagged_Data$DBase_DNPPE_RF[match_row] <- Combined$DBase_DNPPE_RF[j]
+  for (j in 1:length(Known_RtFs$match_ID)) {
+    match_row <- as.numeric(which(grepl(paste0("^", Known_RtFs$match_ID[j], "$"), Flagged_Data$match_ID)))
+    Flagged_Data$Flag[match_row] <- as.character(Known_RtFs$Flag[j])
+    Flagged_Data$DBase_std_RF[match_row] <- Known_RtFs$DBase_std_RF[j]
+    Flagged_Data$Std_name_RF[match_row] <- standard
+    Flagged_Data$Std_rt_RF[match_row] <- std_rt
 
     cat("\r")
     flush.console()
-    cat("Combining data.", "Compound", j, "of", length(Combined$match_ID), "...")
+    cat("Combining data.", "Compound", j, "of", length(Known_RtFs$match_ID), "...")
   }
   cat("Done!")
 
-  Flagged_Data$Flag <- factor(Flagged_Data$Flag, levels = c("Red", "ms2v", "5%_rtv", "10%_rtv", "Double_Peak?", "Unknown"))
-  Flagged_Data$DBase_DNPPE_RF <- as.numeric(Flagged_Data$DBase_DNPPE_RF)
+  #insure the correct classes on certain output
+  Flagged_Data$Flag_RF <- factor(Flagged_Data$Flag, levels = c("Red", "ms2v", "5%_rtv", "10%_rtv", "Double_Peak?", "Unknown"))
+  Flagged_Data$DBase_std_RF <- as.numeric(Flagged_Data$DBase_std_RF)
 
 
   if (plot_data == TRUE) {
-    #####################
-    # From here, giving the option to generate mz vs. rt graphs
-    # for each of the major classes.
-
-    # add a column for plot labelling by C and DB #
-    lipidclass <- Flagged_Data %>%
-      subset(degree_oxidation == 0)
-
-    # going through the big nine lipids plus TAGs, DAGs, and FFAs
-    lipid_classes <- unique(Main_Lipids$species)
-
-    # and plot each, saving a copy to the working directory
-    cat("\n")
-    for (i in 1:length(lipid_classes)) {
-
-      print(ggplot(data = subset(lipidclass,species == lipid_classes[i])) +
-        geom_point(aes(x = peakgroup_rt, y = LOBdbase_mz, color = Flag), size = 3) +
-        scale_color_manual(values = c("Red" = "#e55934","ms2v" = "#fdbd4c", "5%_rtv" = "#9bc53d", "10%_rtv" = "#0f5f20", "Double_Peak?" = "#5bc0eb", "Unknown" = "#ff99ff")) +
-        geom_point(aes(x = DBase_DNPPE_RF * DNPPE_RT, y = LOBdbase_mz, color = Flag), shape = 3) +
-        geom_errorbarh(aes(xmax = DBase_DNPPE_RF * DNPPE_RT * 1.1, xmin = DBase_DNPPE_RF * DNPPE_RT * 0.9, height = 0.2, y = LOBdbase_mz, color = Flag)) +
-        geom_text(aes(x = peakgroup_rt, y = LOBdbase_mz, label = paste0(FA_total_no_C, ":", FA_total_no_DB), hjust = 1, vjust = 2, color = Flag)) +
-        ggtitle(paste0("RtF Screening for ", lipid_classes[i])) +
-        xlab("Peak Group Retention Time (sec)") +
-        ylab("Peak Group m/z"))
-
-      if (save_plots == TRUE) {
-        ggsave(
-          filename = paste0(lipid_classes[i], "_MZRT_Flag_", data_title, ".tiff"),
-          plot = last_plot(),
-          device = "tiff",
-          width = 22, height = 17
-        )
-      }
-      cat("\r")
-      flush.console()
-      cat("Generating plot", i, "of", length(lipid_classes), "...")
-    }
-    cat("Done!")
+    LOB_plotdata(Flagged_Data,"RTF",choose_class = choose_class)
   }
 
   # output to match inputed format, whether that is LOBSet of data.frame
+  cat("\n\n")
   if (is.data.frame(peakdata)) {
     return(Flagged_Data)
   } else {
