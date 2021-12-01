@@ -413,7 +413,7 @@ LOB_lpsolveAPI <- function(peakdata, choose_class = NULL, save.files = FALSE, us
         LOBrun$species,
         LOBrun$DNPPE_Factor,
         LOBrun$Flag,
-        LOBrun$DBase_DNPPE_RF,
+        LOBrun$Flag_RF,
         LOBrun$weights
       )
       # Re-name our column names
@@ -427,7 +427,7 @@ LOB_lpsolveAPI <- function(peakdata, choose_class = NULL, save.files = FALSE, us
         "species",
         "DNPPE_Factor",
         "Flag",
-        "DBase_DNPPE_RF",
+        "Flag_RF",
         "weights"
       )
     } else {

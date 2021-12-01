@@ -8,8 +8,9 @@ This document serves as a vignette on the new functionality in LOBtools. We use 
 Load Data
 ```{r}
 #read mzXML files into an OnDiskMSnExp object
-mzXMLfiles <- list.files("C:/Users/henryholm/Desktop/JenkinAE1812ctd/",recursive = TRUE, full.names = TRUE)
+mzXMLfiles <- list.files("C:/Users/henryholm/Desktop/JenkinAE1812ctd/", recursive = TRUE, full.names = TRUE)
 rawSpec <- MSnbase::readMSData(mzXMLfiles, centroided=TRUE, mode="onDisk")
+
 ```
 
 Find MS2
