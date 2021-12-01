@@ -16,4 +16,6 @@ export("LOB_viewstandard",
        "LOB_findMS2",
        "LOB_plotMS2",
        "LOB_final_codes",
-       "LOB_adduct_summary")
+       "LOB_adduct_summary",
+       "LOB_plotdata",
+       "LOB_addRTF")
