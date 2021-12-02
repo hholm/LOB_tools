@@ -18,4 +18,5 @@ export("LOB_viewstandard",
        "LOB_final_codes",
        "LOB_adduct_summary",
        "LOB_plotdata",
-       "LOB_addRTF")
+       "LOB_addRTF",
+       "LOB_RTFscreen")
