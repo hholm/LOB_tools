@@ -390,7 +390,7 @@ LOB_lpsolveAPI <- function(peakdata, choose_class = NULL, save.files = FALSE, us
     if (any(!(choose_class %in% unique(LOBpeaklist$species)))) {
       stop("Chosen 'choose_class' does not appear in the 'species' column of data.frame.")
     } else {
-      LOBpeaklist <- LOBpeaklist[which(LOBpeaklist$species == choose_class), ]
+      LOBpeaklist <- LOBpeaklist[which(LOBpeaklist$species %in% choose_class), ]
     }
   } else {
     LOBpeaklist <- LOBpeaklist[which(is.na(LOBpeaklist$FA_total_no_DB) == FALSE), ]

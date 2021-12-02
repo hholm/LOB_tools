@@ -75,6 +75,6 @@ LOB_addRTF <- function(peakdata, LOBdbase, standards, entry, ms2v, only_add_ms2v
       LOBdbase@rtf[[standards[j]]][[entry]]$data[cmp_lb,"ms2v"] <- if(LOBpeaklist[cmp_pl,"match_ID"] %in% ms2v){TRUE}else{FALSE}
     }
   }
-  cat("Done!")
+  cat("Done!\n")
   return(LOBdbase)
 }
