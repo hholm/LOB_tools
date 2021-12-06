@@ -5,6 +5,11 @@ LOB_plotPosNeg <- function(XCMSnExp_pos, XCMSnExp_neg, peakdata_pos = NULL, addu
   if (window < 1) {
     stop("Window can not be less than 1 (Full rt window searched for scans).")
   }
+
+  if(is.null(file)){
+    stop("Please supply a vector with two filenames too plot from XCMSnExp_pos and XCMSnExp_neg respectively.")
+  }
+
   # check for 'file' in both objects
   if (any(!file[1] %in% MSnbase::sampleNames(XCMSnExp_pos) | !file[2] %in% MSnbase::sampleNames(XCMSnExp_neg))) {
     stop("File(s) '", paste(file[which(!file %in% MSnbase::sampleNames(XCMSnExp))], collapse = ", "), "' not found in both XCMSnExp.
@@ -87,8 +92,8 @@ LOB_plotPosNeg <- function(XCMSnExp_pos, XCMSnExp_neg, peakdata_pos = NULL, addu
     df_pos[[1]]@intensity[which(is.na(df_pos[[1]]@intensity))] <- 0
     df_neg[[1]]@intensity[which(is.na(df_neg[[1]]@intensity))] <- 0
 
-      gridExtra::grid.arrange( # plot both graphs
-        ggplot() +
+    plot(rbind( # plot both graphs
+      ggplot2::ggplotGrob(ggplot() +
           geom_line(aes(
             x = df_pos[[1]]@rtime,
             y = df_pos[[1]]@intensity
@@ -98,8 +103,8 @@ LOB_plotPosNeg <- function(XCMSnExp_pos, XCMSnExp_neg, peakdata_pos = NULL, addu
           xlim(rt - rtspan * window, rt + rtspan * window) +
           geom_vline(aes(xintercept = c(rt + rtspan, rt - rtspan)), color = "green", alpha = 0.75) +
           ggtitle(as.character(paste("Lipid Name =", peakdata_pos[i, "compound_name"]," Mode = Positive")),
-                  subtitle = paste(" M/Z = ", mz, " File = ", file[1]," PPM =",ppm)),
-        ggplot() +
+                  subtitle = paste(" M/Z = ", mz, " File = ", file[1]," PPM =",ppm))),
+      ggplot2::ggplotGrob(ggplot() +
           geom_line(aes(
             x = df_neg[[1]]@rtime,
             y = df_neg[[1]]@intensity
@@ -110,6 +115,6 @@ LOB_plotPosNeg <- function(XCMSnExp_pos, XCMSnExp_neg, peakdata_pos = NULL, addu
           geom_vline(aes(xintercept = c(rt + rtspan, rt - rtspan)), color = "green", alpha = 0.75) +
           ggtitle(as.character(paste("Lipid Name =", peakdata_pos[i, "compound_name"]," Mode = Negative")),
                   subtitle = paste(" M/Z = ", mz, " File = ", file[2]," PPM =",ppm))
-      )
+      )))
   }
 }

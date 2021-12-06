@@ -47,9 +47,9 @@ LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_type = "most_scans", mz 
   }
 
   if (!is.null(diagnostic)) {
-    if (is.null(names(diagnostic))){
+    if (is.null(names(diagnostic))) {
       stop("'diagnostic' must be a named numeric.")
-    }else{
+    } else {
       if (anyDuplicated((names(diagnostic))) != 0) {
         stop("'diagnostic' names must be unique")
       }
@@ -59,9 +59,9 @@ LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_type = "most_scans", mz 
   }
 
   if (!is.null(NL)) {
-    if (is.null(names(NL))){
+    if (is.null(names(NL))) {
       stop("'NL' must be a named numeric.")
-    }else{
+    } else {
       if (anyDuplicated((names(NL))) != 0) {
         stop("'NL' names must be unique.")
       }
@@ -182,20 +182,24 @@ LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_type = "most_scans", mz 
           diff <- sapply(unlist(which), function(x) {
             (spec$data$mtc[x] - diagnostic[names(which(which == x))][[1]]) / (diagnostic[names(which(which == x))][[1]] * 0.000001)
           })
-        }else{diff <- NULL}
+        } else {
+          diff <- NULL
+        }
 
         if (!is.null(NL)) { # find fragments
-          losses <- (mz-spec$data$mtc)
+          losses <- (mz - spec$data$mtc)
           which_nl <- lapply(nlrange, function(x) {
             which(losses > x[1] & losses < x[2])
           })
           diff_nl <- sapply(unlist(which_nl), function(x) {
             (losses[x] - NL[names(which(which_nl == x))][[1]]) / (NL[names(which(which_nl == x))][[1]] * 0.000001)
           })
-          if(length(diff_nl)>0){
-          names(diff_nl) <- paste('NL',names(diff_nl),sep = '')
+          if (length(diff_nl) > 0) {
+            names(diff_nl) <- paste("NL", names(diff_nl), sep = "")
+          }
+        } else {
+          diff_nl <- NULL
         }
-        }else{diff_nl <- NULL}
 
         splits <- c(seq(min(spec$data$mtc), max(spec$data$mtc), by = 10), max(spec$data$mtc)) # create a vector to split up the MS2 spectra by mz
 
@@ -223,38 +227,42 @@ LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_type = "most_scans", mz 
           colors[unlist(which_nl)] <- "green"
         }
 
-        diff_group <- c(diff,diff_nl)
-        gridExtra::grid.arrange( # plot both graphs
-  ggplot() +
-    geom_line(aes(
-      x = df[[1]]@rtime,
-      y = df[[1]]@intensity
-    )) +
-    xlab("Retention Time") +
-    ylab("Intensity") +
-    xlim(rt - rtspan * window, rt + rtspan * window) +
-    geom_vline(aes(xintercept = plot_scans$retentionTime), color = "blue", alpha = 0.5) +
-    geom_vline(aes(xintercept = c(rt + rtspan, rt - rtspan)), color = "green", alpha = 0.75) +
-    geom_vline(aes(xintercept = plot_scans[closest_scan, "retentionTime"]), color = "red") +
-    ggtitle(as.character(paste("Lipid Name =", names(scans[i]))), subtitle = paste(" M/Z = ", mz, " File = ", most[[i]][z])),
-  spec +
-    geom_text(aes(label = round(mtc, 2), y = i_plot), color = colors, vjust = -0.5) +
-    ggtitle(paste(spec$labels$title, "; Collision Energy", XCMSnExp[[closest_scan]]@collisionEnergy, "; Retention Time", XCMSnExp[[closest_scan]]@rt, "sec")) +
-    if (!is.null(diagnostic) | !is.null(NL)) {
-      ggplot2::annotate(
-        geom = "text",
-        label = paste(
-          "Fragments\n",
-          if(length(diff_group)>0){
-          paste(names(diff_group), "=",
-                round(unlist(diff_group), digits = 5),
-                collapse = "\n")}else{NULL}
-        ), x = Inf, y = Inf, hjust = 1, vjust = 1
-      )
-    } else {
-      NULL
-    }
-)
+        diff_group <- c(diff, diff_nl)
+        plot(rbind( # plot both graphs
+          ggplot2::ggplotGrob(ggplot() +
+            geom_line(aes(
+              x = df[[1]]@rtime,
+              y = df[[1]]@intensity
+            )) +
+            xlab("Retention Time") +
+            ylab("Intensity") +
+            xlim(rt - rtspan * window, rt + rtspan * window) +
+            geom_vline(aes(xintercept = plot_scans$retentionTime), color = "blue", alpha = 0.5) +
+            geom_vline(aes(xintercept = c(rt + rtspan, rt - rtspan)), color = "green", alpha = 0.75) +
+            geom_vline(aes(xintercept = plot_scans[closest_scan, "retentionTime"]), color = "red") +
+            ggtitle(as.character(paste("Lipid Name =", names(scans[i]))), subtitle = paste(" M/Z = ", mz, " File = ", most[[i]][z]))),
+          ggplot2::ggplotGrob(spec +
+            geom_text(aes(label = round(mtc, 2), y = i_plot), color = colors, vjust = -0.5) +
+            ggtitle(paste(spec$labels$title, "; Collision Energy", XCMSnExp[[closest_scan]]@collisionEnergy, "; Retention Time", XCMSnExp[[closest_scan]]@rt, "sec")) +
+            if (!is.null(diagnostic) | !is.null(NL)) {
+              ggplot2::annotate(
+                geom = "text",
+                label = paste(
+                  "Fragments\n",
+                  if (length(diff_group) > 0) {
+                    paste(names(diff_group), "=",
+                      round(unlist(diff_group), digits = 5),
+                      collapse = "\n"
+                    )
+                  } else {
+                    NULL
+                  }
+                ), x = Inf, y = Inf, hjust = 1, vjust = 1
+              )
+            } else {
+              NULL
+            })
+        ))
       }
     }
   }
