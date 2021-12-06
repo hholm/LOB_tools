@@ -143,25 +143,23 @@ LOB_RTFscreen <- function(peakdata, LOBdbase, standard = "DNPPE",entry = NULL, c
   Ox_Lipids <- original_data %>%
     subset(degree_oxidation > 0)
 
-  # flag known vs unknown by checking whether grepl returns anything in the database
-  for (i in 1:length(Main_Lipids$compound_name)) {
-    which_row <- which(grepl(paste0("^", Main_Lipids$compound_name[i], "$"), LOBdbase@parent_compound_name))
-    #since LOBdbbase has entry for every adduct just get the highest one (should all be same info)
-    which_row <- which_row[which(LOBdbase@adduct_rank[which_row] == 1)]
-
-    if (length(which_row) > 0) {
-      if (!is.na(RT_Factor_Dbase$factor[which_row])) {
-        Main_Lipids$Flag[i] <- "Known"
-      } else {
-        Main_Lipids$Flag[i] <- "Unknown"
+  # flag known vs unknown verse the database
+  cat("Checking for databases entries...")
+  Main_Lipids$Flag <- unlist(apply(
+    Main_Lipids, 1,
+    function(x) {
+      if (x["compound_name"] %in% LOBdbase@parent_compound_name) {
+        #since LOBdbbase has entry for every adduct just get the highest one (should all be same info)
+        if(!is.na(RT_Factor_Dbase$factor[which(LOBdbase@parent_compound_name == x["compound_name"] & LOBdbase@adduct_rank == 1)])){
+          "Known"
+        }else{
+          "Unknown"
+        }
+      }else{
+        "Not In Database"
       }
-    } else {
-      Main_Lipids$Flag[i] <- "Not In Database"
     }
-    cat("\r")
-    flush.console()
-    cat("Checking for databases entries.", "Compound", i, "of", length(Main_Lipids$compound_name), "...")
-  }
+  ))
   cat("Done!")
 
   # separate into two dfs
@@ -248,6 +246,7 @@ LOB_RTFscreen <- function(peakdata, LOBdbase, standard = "DNPPE",entry = NULL, c
 
 
   if (plot_data == TRUE) {
+    cat("\n")
     LOB_plotdata(Flagged_Data,"RTF",choose_class = choose_class)
   }
 
