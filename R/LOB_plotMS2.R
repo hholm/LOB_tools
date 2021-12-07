@@ -1,4 +1,4 @@
-LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_type = "most_scans", mz = NULL, rt = NULL, rtspan = 175,
+LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_file = "most_scans", mz = NULL, rt = NULL, rtspan = 175,
                         ppm_pre = 100, ppm = 2.5, file = NULL, window = 1, diagnostic = NULL, diagnostic_ppm = 15, NL = NULL) {
 
   # check inputs
@@ -6,12 +6,12 @@ LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_type = "most_scans", mz 
     stop("Window can not be less than 1 (Full rt window searched for scans).")
   }
 
+  if (!(plot_file %in% c("most_scans", "highest_int"))) {
+    cat("Input 'plot_file' not a charactor vector reading either 'most_scans' or 'highest_int'. Treating as file name.")
+    file <- plot_file
+  }
+
   if (is.null(file)) {
-    if (!(plot_type %in% c("most_scans", "highest_int"))) {
-      stop("Input 'plot_type' not recognized. Must be charactor vector reading either
-         'most_scans' or 'highest_int' if 'file' input is not specified")
-    }
-  } else {
     if (any(!file %in% MSnbase::sampleNames(XCMSnExp))) {
       stop("File(s) '", paste(file[which(!file %in% sampleNames(XCMSnExp))], collapse = ", "), "' not found in XCMSnExp. Check sampleNames(XCMSnExp) to see files in object.")
     }
@@ -93,7 +93,7 @@ LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_type = "most_scans", mz 
       }
     )
   } else {
-    if (plot_type == "most_scans") {
+    if (plot_file == "most_scans") {
       # Find the file with the most scans for each lipid
       most <- lapply(
         scans,
@@ -107,7 +107,7 @@ LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_type = "most_scans", mz 
       )
     }
 
-    if (plot_type == "highest_int") {
+    if (plot_file == "highest_int") {
       # Find the file with the highest precursor int for each lipid
       most <- lapply(
         scans,

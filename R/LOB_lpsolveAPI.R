@@ -1,4 +1,4 @@
-LOB_lpsolveAPI <- function(peakdata, choose_class = NULL, save.files = FALSE, use_ms2 = TRUE, plot_data = FALSE, use_weight = TRUE, hijacking = FALSE) {
+LOB_lpsolveAPI <- function(peakdata, choose_class = NULL, save.files = FALSE, use_ms2 = TRUE, plot_data = FALSE, use_weight = TRUE, hijacking = FALSE, max_solutions = 10, presolve = "mergerows") {
   #library(lpSolveAPI)
   #library(dplyr)
   #library(ggplot2)
@@ -183,7 +183,7 @@ LOB_lpsolveAPI <- function(peakdata, choose_class = NULL, save.files = FALSE, us
         cat("Writing rules for", as.character(unique(X$species)), "compound number", i, "of", nrow(run), ". Number of Rules created:", nrow(Exclusion_Matrix) - 1, "...")
       }
     }
-    cat("Done")
+    cat("Done!")
     Final_Exclusion_Matrix <- Exclusion_Matrix[-1, ]
 
     if (NROW(Final_Exclusion_Matrix) == 0) {
@@ -209,7 +209,7 @@ LOB_lpsolveAPI <- function(peakdata, choose_class = NULL, save.files = FALSE, us
       set.constr.type(lpmodel, rep("<=", num_con))
       set.rhs(lpmodel, rep(1, num_con))
       set.type(lpmodel, columns = c(1:num_points), "binary")
-      lp.control(lpmodel, sense = "max")
+      lp.control(lpmodel, sense = "max", presolve = presolve)
       for (i in 1:num_points) {
         set.column(lpmodel, i, rep(1, length(which(Final_Exclusion_Matrix[, i] == 1))), which(Final_Exclusion_Matrix[, i] == 1))
       }
@@ -218,23 +218,27 @@ LOB_lpsolveAPI <- function(peakdata, choose_class = NULL, save.files = FALSE, us
 
       # find first solution
       status <- solve(lpmodel)
+      cat(" First solution reached!")
       sols <- matrix(ncol = num_points)
       sols <- sols[-1, ] # create list for more solutions
       obj0 <- get.objective(lpmodel)
-      counter <- 0 # construct a counter so you wont get more than 100 solutions
-
+      counter <- 1 # construct a counter so you wont get more than 100 solutions
+      cat("\n")
       # find more solutions
-      while (counter < 100) {
+      while (counter < max_solutions) {
+        cat("\r")
+        flush.console()
+        cat("Looking for more solutions... ",counter+1," of ",max_solutions,"total solutions...")
         sol <- get.variables(lpmodel)
         sols <- rbind(sols, sol)
         add.constraint(lpmodel, 2 * sol - 1, "<=", sum(sol) - 1)
         rc <- solve(lpmodel)
+        counter <- counter + 1
         if (status != 0) break
         if (get.objective(lpmodel) < obj0) break
-        counter <- counter + 1
       }
 
-      cat(" Done")
+      cat(" Done!")
 
       bar <- data.frame(colSums(sols))
       run$Type <- rep(0, nrow(run))
