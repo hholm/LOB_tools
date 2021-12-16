@@ -228,7 +228,7 @@ LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_file = "most_scans", mz 
         }
 
         diff_group <- c(diff, diff_nl)
-        plot(rbind( # plot both graphs
+        plot_final <- rbind( # plot both graphs
           ggplot2::ggplotGrob(ggplot() +
             geom_line(aes(
               x = df[[1]]@rtime,
@@ -262,10 +262,11 @@ LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_file = "most_scans", mz 
             } else {
               NULL
             })
-        ))
+        )
+        plot(plot_final)
       }
     }
   }
   cat("\n\n")
-  return(scans)
+  return(list(scans,plot_final))
 }
