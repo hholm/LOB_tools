@@ -1,9 +1,16 @@
 ---
-title: "LOBtools Vignette"
+title: "LOBtools: Further Screen and Visualize LOBSTAHS lipid annotations."
 output: html_notebook
 ---
 
-This document serves as a vignette on the new functionality in LOBtools. We use the Jenkins data set too illustrate the new tools available for lipid screening and data visualization in this package.
+This document serves as a vignette on the new functionality presented in LOBtools. We use the XYZ data set too illustrate the new tools available for lipid screening and data visualization in this package.
+
+Much like previous LOBSTAHS package vignettes, this will not serve as a comprehensive overview of the XCMS and CAMERA packages, as many great tutorials and vignettes already exist for these packages. However, we will provide the code used in pre-processing our samples for screening by LOBSTAHS and LOBtools which can be found here (URL).
+
+
+```{r}
+
+```
 
 Load Data
 ```{r}

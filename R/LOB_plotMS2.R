@@ -1,15 +1,17 @@
-LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_file = "most_scans", mz = NULL, rt = NULL, rtspan = 175,
-                        ppm_pre = 100, ppm = 2.5, file = NULL, window = 1, diagnostic = NULL, diagnostic_ppm = 15, NL = NULL) {
+LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_file = "closest_scan", mz = NULL, rt = NULL, rtspan = 175,
+                        ppm_pre = 100, ppm = 2.5, window = 1, diagnostic = NULL, diagnostic_ppm = 15, NL = NULL) {
 
   # check inputs
   if (window < 1) {
     stop("Window can not be less than 1 (Full rt window searched for scans).")
   }
 
-  if (!(plot_file %in% c("most_scans", "highest_int"))) {
-    cat("Input 'plot_file' not a charactor vector reading either 'most_scans' or 'highest_int'. Treating as file name.")
+  if (!(plot_file %in% c("most_scans", "highest_int","closest_scan"))) {
+    cat("Input 'plot_file' not a charactor vector reading either 'most_scans','closest_scan', or 'highest_int'. Treating as file name.")
     file <- plot_file
-  }
+  }else{
+    file <- NULL
+    }
 
   if (is.null(file)) {
     if (any(!file %in% MSnbase::sampleNames(XCMSnExp))) {
@@ -120,8 +122,22 @@ LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_file = "most_scans", mz 
         }
       )
     }
-  }
 
+
+    if (plot_file == "closest_scan") {
+      # Find the file with the most scans for each lipid
+      most <- lapply(
+        scans,
+        function(x) {
+          if (class(x) != "data.frame") {
+            "No ms2 spectra found."
+          } else {
+            x[which(abs(x$retentionTime - rt) == min(abs(x$retentionTime - rt))), "file"][1]
+          }
+        }
+      )
+    }
+  }
   # plot ms1 chromatogram of lipid
   for (i in 1:length(scans)) {
     cat("\n") # for console feedback
