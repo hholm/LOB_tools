@@ -125,14 +125,22 @@ LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_file = "closest_scan", m
 
 
     if (plot_file == "closest_scan") {
-      # Find the file with the most scans for each lipid
+      # Find the file with the closest scans for each lipid
+      scans_rt <- scans
+      for (i in 1:length(scans_rt)) {
+        if (!is.null(peakdata)) {
+          scans_rt[[i]]$rt <- peakdata[i, "peakgroup_rt"]
+        } else {
+          scans_rt[[i]]$rt <- rt
+        }
+      }
       most <- lapply(
-        scans,
+        scans_rt,
         function(x) {
           if (class(x) != "data.frame") {
             "No ms2 spectra found."
           } else {
-            x[which(abs(x$retentionTime - rt) == min(abs(x$retentionTime - rt))), "file"][1]
+            x[which(abs(x$retentionTime - x$rt[[1]]) == min(abs(x$retentionTime - x$rt[[1]]))), "file"][1]
           }
         }
       )
