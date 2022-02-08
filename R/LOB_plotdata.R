@@ -8,14 +8,14 @@ LOB_plotdata <- function(peakdata,plot_type,choose_class = NULL) {
       "Please use one of these formats for your peakdata."
     )
   }
-  
+
   if(!plot_type %in% c("RTF")){
     stop(
       "Input 'plot_type' must be a 'character' and contain one or more of the following:\n",
       "RTF"
     )
   }
-  
+
   # Rename our peak list so we can modify it and keep the complete one
   if (is.data.frame(peakdata)) {
     LOBpeaklist <- peakdata
@@ -25,9 +25,9 @@ LOB_plotdata <- function(peakdata,plot_type,choose_class = NULL) {
 
   # plot RTF data
   if (plot_type %in% "RTF") {
-    
+
     if(is.null(LOBpeaklist$Flag_RF)){stop("No RTF screened data columns in object.")}
-    
+
     # subset to classes based on inputs
     if (is.null(choose_class)) {
       # get lipid classes for which there are rtf DB entries
@@ -52,7 +52,7 @@ LOB_plotdata <- function(peakdata,plot_type,choose_class = NULL) {
 
       cat("\r")
       flush.console()
-      cat("Generating plot", i, "of", length(lipid_classes), "...")
+      cat("\nGenerating plot", i, "of", length(lipid_classes), "...")
     }
     cat("Done!")
   }

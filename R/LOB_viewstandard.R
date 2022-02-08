@@ -95,7 +95,7 @@ LOB_viewstandard <- function(object){
 
           # Input: RT Low
           numericInput(inputId = "rtmin",
-                       label = "Retention Time - Min",
+                       label = "Retention Time - Min (minutes)",
                        value = NULL,
                        min = 0,
                        max = 30,
@@ -104,7 +104,7 @@ LOB_viewstandard <- function(object){
 
           # Input: RT High
           numericInput(inputId = "rtmax",
-                       label = "Retention Time - Max",
+                       label = "Retention Time - Max (minutes)",
                        value = NULL,
                        min = 0,
                        max = 30,
