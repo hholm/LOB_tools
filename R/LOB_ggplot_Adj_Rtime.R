@@ -1,5 +1,5 @@
 LOB_ggplot_Adj_Rtime <- function(object, adjustedRtime = TRUE) {
-  
+
   #load helper function (since this isn't in xcms package anymore)
   hackyRtAdjustment <- function(x, rtraw, rtadj) {
     ## re-order everything if rtraw is not sorted; issue #146
@@ -25,7 +25,7 @@ LOB_ggplot_Adj_Rtime <- function(object, adjustedRtime = TRUE) {
       names(res) <- names(x)
     res
   }
-  
+
   #start process (just copied from plotAdjustedRtime)
   if (!is(object, "XCMSnExp")) {
     stop("'object' has to be an 'XCMSnExp' object.")
@@ -36,39 +36,10 @@ LOB_ggplot_Adj_Rtime <- function(object, adjustedRtime = TRUE) {
   diffRt <- rtime(object, adjusted = TRUE) - rtime(object,
     adjusted = FALSE
   )
+
   diffRt <- split(diffRt, fromFile(object))
   xRt <- rtime(object, adjusted = adjustedRtime, bySample = TRUE)
-  if (length(col) == 1) {
-    col <- rep(col, length(diffRt))
-  }
-  if (length(lty) == 1) {
-    lty <- rep(lty, length(diffRt))
-  }
-  if (length(lwd) == 1) {
-    lwd <- rep(lwd, length(diffRt))
-  }
-  if (length(col) != length(diffRt)) {
-    warning(
-      "length of 'col' does not match the number of samples! Will ",
-      "use 'col[1]' for all samples."
-    )
-    col <- rep(col[1], length(diffRt))
-  }
-  if (length(lty) != length(lty)) {
-    warning(
-      "length of 'lty' does not match the number of samples! Will ",
-      "use 'lty[1]' for all samples."
-    )
-    lty <- rep(lty[1], length(diffRt))
-  }
-  if (length(lwd) != length(lwd)) {
-    warning(
-      "length of 'lwd' does not match the number of samples! Will ",
-      "use 'lwd[1]' for all samples."
-    )
-    lwd <- rep(lwd[1], length(diffRt))
-  }
-  
+
   #restructure data for lines and save
   forplot <- data.frame(xRt)
   colnames(forplot) <- sampleNames(res)
@@ -108,8 +79,8 @@ LOB_ggplot_Adj_Rtime <- function(object, adjustedRtime = TRUE) {
 
         #restructure data for points
         forpoint <- tidyr::pivot_longer(data.frame(xRt),cols = tidyr::everything())
-        forpoint[,"diffRt"] <- tidyr::pivot_longer(data.frame(diffRt),cols = tidyr::everything())[,"value"] 
-        
+        forpoint[,"diffRt"] <- tidyr::pivot_longer(data.frame(diffRt),cols = tidyr::everything())[,"value"]
+
         #plot
         ggplot2::ggplot() +
           ggplot2::geom_path(ggplot2::aes(forplot$value, forplot$diffRt, group = forplot$name, color = forplot$name),size = 0.6) +
