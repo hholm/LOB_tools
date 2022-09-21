@@ -17,7 +17,7 @@ export("LOB_addRTF",
        "LOB_plotdata",
        "LOB_plotMS2",
        "LOB_plotPosNeg",
-       "LOB_RTF_dbase_addition"
+       "LOB_RTF_dbase_addition",
        "LOB_RTFscreen",
        "LOB_RTFsort",
        "LOB_viewdata",
