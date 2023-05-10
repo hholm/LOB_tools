@@ -41,12 +41,20 @@ LOB_ggplot_Adj_Rtime <- function(object, adjustedRtime = TRUE) {
   xRt <- rtime(object, adjusted = adjustedRtime, bySample = TRUE)
 
   #restructure data for lines and save
-  forplot <- data.frame(xRt)
-  colnames(forplot) <- sampleNames(res)
-  forplot <- tidyr::pivot_longer(forplot,cols = tidyr::everything())
-  forplot[,"diffRt"] <- tidyr::pivot_longer(data.frame(diffRt),cols = tidyr::everything())[,"value"]
 
-  ph <- processHistory(res,type = "Retention time correction")
+  #get files in list by length of entry
+  names <- list()
+  for (i in 1:length(sampleNames(object))) {
+    names <- c(names,rep(sampleNames(object)[i],
+                             unlist(lapply(xRt,function(x){length(x)}),use.names = FALSE)[i]))
+  }
+  #unlist RTs and add names
+  forplot <- data.frame(value = unlist(xRt,use.names = FALSE),names = unlist(names))
+
+  #add Rt differences
+  forplot[,"diffRt"] <- unlist(diffRt,use.names = FALSE)
+
+  ph <- processHistory(object,type = "Retention time correction")
   if (length(ph)) {
     ph <- ph[[length(ph)]]
     if (is(ph, "XProcessHistory")) {
@@ -86,7 +94,8 @@ LOB_ggplot_Adj_Rtime <- function(object, adjustedRtime = TRUE) {
           ggplot2::geom_path(ggplot2::aes(forplot$value, forplot$diffRt, group = forplot$name, color = forplot$name),size = 0.6) +
           ggplot2::theme_minimal() +
           ggplot2::geom_point(ggplot2::aes(forpoint$value,forpoint$diffRt),shape = 4) +
-          ggplot2::labs(x = if(adjustedRtime == TRUE){"Adjusted RT"}else{"Raw RT"}, y = "RT Difference", color = "Samples")
+          ggplot2::labs(x = if(adjustedRtime == TRUE){"Adjusted RT"}else{"Raw RT"}, y = "RT Difference", color = "Samples") +
+          ggplot2::theme(legend.position = "none")
       }
     }
   }
