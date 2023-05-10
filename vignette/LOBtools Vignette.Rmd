@@ -15,7 +15,7 @@ Much like previous LOBSTAHS package vignettes, this will not serve as a comprehe
 Load Data
 ```{r}
 #read mzXML files into an OnDiskMSnExp object
-mzXMLfiles <- list.files("C:/Users/henryholm/Desktop/JenkinAE1812ctd/", recursive = TRUE, full.names = TRUE)
+mzXMLfiles <- list.files("C:/Users/henryholm/OneDrive - Woods Hole Oceanographic Institution/Desktop/JenkinAE1812ctd/mzXML_ms1_pos_mode/", recursive = TRUE, full.names = TRUE)
 rawSpec <- MSnbase::readMSData(mzXMLfiles, centroided=TRUE, mode="onDisk")
 
 ```
@@ -23,7 +23,14 @@ rawSpec <- MSnbase::readMSData(mzXMLfiles, centroided=TRUE, mode="onDisk")
 Find MS2
 ```{r}
 peaklist <- getLOBpeaklist(LOBset)
-LOBtools::LOB_plotMS2(XCMSnExp = rawSpec,peakdata = subset(peaklist,species == "SQDG"))
+
+pos_fa<- LOBtools::pos_fa
+pos_gylfa <- LOBtools::pos_gylfa 
+names(pos_gylfa) <- paste("gly",names(LOBtools::pos_gylfa),sep = "")
+
+LOBtools::LOB_plotMS2(XCMSnExp = rawSpec,
+                      peakdata = subset(peaklist,species == "SQDG")[50,],
+                      diagnostic = c(pos_fa,pos_gylfa))
 ```
 
 
@@ -37,5 +44,11 @@ LOBset_rtf <- LOBtools::LOB_RTFsort(peakdata = LOBset,Hummel)
 
 LOBtools::LOB_plotMS2()
 
+```
+
+```{r}
+test <- LOB_lpsolveAPI(LOBset,choose_class = "MGDG",use_weight = TRUE,use_ms2 = FALSE,plot_data = TRUE)
+
+LOB_plotdata(peakdata = test, plot_type = "RTF")
 ```
 
