@@ -43,7 +43,8 @@ LOB_final_codes <- function(peakdata) {
     # split the ones that are still duplicated into a potential isomer list
     double_positives <- split(confirmed, duplicated(confirmed$xcms_peakgroup) | duplicated(confirmed$xcms_peakgroup, fromLast = TRUE))[["TRUE"]]
     double_positives$code <- rep("Probable Isomer")
-
+    flagged_set$code[flagged_set$match_ID %in% double_positives$match_ID] <- "Probable Isomer"
+    
     cat("\nIdentifying duplicate assignments...")
 
     # find "unlikely" peakgroups in RTF confirmed set
