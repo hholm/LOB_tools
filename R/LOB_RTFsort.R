@@ -96,7 +96,7 @@ LOB_RTFsort <- function(peakdata, RT_Factor_Dbase, standard = "DNPPE", choose_cl
   # Extract correct standard retention time
   if (class(standard) == "character") {
     if (standard %in% original_data$compound_name) {
-      std_rt <- as.numeric(original_data$peakgroup_rt[which(grepl(standard, original_data$compound_name))])
+      std_rt <- original_data[which(original_data$compound_name == standard),'peakgroup_rt']
     } else {
       stop(
         "Input 'standard' not found in peakdata compound names.\n",
@@ -108,7 +108,7 @@ LOB_RTFsort <- function(peakdata, RT_Factor_Dbase, standard = "DNPPE", choose_cl
 
   if (class(standard) == "numeric") {
     if (standard %in% original_data$match_ID) {
-      std_rt <- as.numeric(original_data$peakgroup_rt[which(grepl(standard, original_data$match_ID))])
+      std_rt <- original_data[which(original_data$match_ID == standard),'peakgroup_rt']
     } else {
       stop(
         "Input 'standard' not found in peakdata match IDs.\n",
@@ -120,16 +120,23 @@ LOB_RTFsort <- function(peakdata, RT_Factor_Dbase, standard = "DNPPE", choose_cl
 
 
   if (length(std_rt) > 1) {
+    if (class(standard) == "numeric") {
+      db_stds <- original_data[which(original_data$match_ID == standard),c("match_ID","compound_name",'peakgroup_rt',"LOBdbase_mz")]
+    }
+    if (class(standard) == "character") {
+      db_stds <- original_data[which(original_data$compound_name == standard),c("match_ID","compound_name",'peakgroup_rt',"LOBdbase_mz")]
+    }
     stop(
-      "Looks like there's more than one annotation in 'peakdata' for your standard.",
-      "Please enter the match_id of the annotation you would like to use in the 'standard' input."
+      "Looks like there's more than one annotation in 'peakdata' for your standard.\n",
+      "Please enter the match_id of the annotation you would like to use in the 'standard' input.\n\n",
+      paste(capture.output(print(db_stds)), collapse = "\n")
     )
   }
 
   # Add column for DNPPE factor and an empty one for flagging IF none exists
   if (is.null(original_data$Flag)){
   original_data <- original_data %>%
-    mutate(DNPPE_Factor = peakgroup_rt / std_rt, Flag = "None", DBase_std_RF = "NA") %>%
+    dplyr::mutate(DNPPE_Factor = peakgroup_rt / std_rt, Flag = "None", DBase_std_RF = "NA") %>%
     subset(species != "NA")
 }
   # isolate major intact polar lipid classes, unoxidized (need to add pigments, etc.)

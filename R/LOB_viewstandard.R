@@ -12,7 +12,7 @@
 
 ### Load Packages ###
 
-LOB_viewstandard <- function(object){
+LOB_viewstandard <- function(object,mz = NULL,ppm = NULL,rt = NULL){
 
   #library(shiny)
 
@@ -78,7 +78,7 @@ LOB_viewstandard <- function(object){
           # Input: MZ
           numericInput(inputId = "mz",
                        label = "m/z",
-                       value = NULL,
+                       value = mz,
                        min = 300,
                        max = 2000,
                        step = 0.00001,
@@ -87,7 +87,7 @@ LOB_viewstandard <- function(object){
           # Input: PPM
           numericInput(inputId = "ppm",
                        label = "Mass Tolerance (ppm)",
-                       value = NULL,
+                       value = ppm,
                        min = 1,
                        max = 100,
                        step = 1,
@@ -95,8 +95,8 @@ LOB_viewstandard <- function(object){
 
           # Input: RT Low
           numericInput(inputId = "rtmin",
-                       label = "Retention Time - Min",
-                       value = NULL,
+                       label = "Retention Time - Min (minutes)",
+                       value = rt[1],
                        min = 0,
                        max = 30,
                        step = 0.01,
@@ -104,8 +104,8 @@ LOB_viewstandard <- function(object){
 
           # Input: RT High
           numericInput(inputId = "rtmax",
-                       label = "Retention Time - Max",
-                       value = NULL,
+                       label = "Retention Time - Max (minutes)",
+                       value = rt[2],
                        min = 0,
                        max = 30,
                        step = 0.01,

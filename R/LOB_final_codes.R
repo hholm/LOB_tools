@@ -27,8 +27,8 @@ LOB_final_codes <- function(peakdata) {
   duplicate_peakgroups <- split_by_peakgroup[["TRUE"]]
 
   # split duplicate assignments by whether they've been identified by retention time factor
-  separated_duplicates <- split(duplicate_peakgroups, duplicate_peakgroups$Flag == "ms2v" |
-    duplicate_peakgroups$Flag == "5%_rtv")
+  separated_duplicates <- split(duplicate_peakgroups, duplicate_peakgroups$Flag_RF == "ms2v" |
+    duplicate_peakgroups$Flag_RF == "5%_rtv")
 
   # separate
   confirmed <- separated_duplicates[["TRUE"]]
@@ -66,37 +66,37 @@ LOB_final_codes <- function(peakdata) {
 
   # assigning final codes
   for (m in 1:length(unique_peakgroups$match_ID)) {
-    if (grepl("ms2v|5%_rtv", unique_peakgroups$Flag[m]) == TRUE) {
+    if (grepl("ms2v|5%_rtv", unique_peakgroups$Flag_RF[m]) == TRUE) {
       unique_peakgroups$code[m] <- "RTF_Confirmed"
     }
   }
 
   for (m in 1:length(unique_peakgroups$match_ID)) {
-    if (grepl("10%_rtv|Double_Peak?", unique_peakgroups$Flag[m]) == TRUE) {
+    if (grepl("10%_rtv|Double_Peak?", unique_peakgroups$Flag_RF[m]) == TRUE) {
       unique_peakgroups$code[m] <- "Double Check"
     }
   }
 
   for (m in 1:length(unique_peakgroups$match_ID)) {
-    if (grepl("Yes", unique_peakgroups$lpSolve[m]) == TRUE & grepl("Unknown", unique_peakgroups$Flag[m]) == TRUE) {
+    if (grepl("Yes", unique_peakgroups$lpSolve[m]) == TRUE & grepl("Unknown", unique_peakgroups$Flag_RF[m]) == TRUE) {
       unique_peakgroups$code[m] <- "LP_Solve_Confirmed"
     }
   }
 
   for (m in 1:length(unique_peakgroups$match_ID)) {
-    if (grepl("Red", unique_peakgroups$Flag[m]) == TRUE) {
+    if (grepl("Red", unique_peakgroups$Flag_RF[m]) == TRUE) {
       unique_peakgroups$code[m] <- "RTF_Failure"
     }
   }
 
   for (m in 1:length(unique_peakgroups$match_ID)) {
-    if (grepl("Unknown", unique_peakgroups$Flag[m]) == TRUE & grepl("No", unique_peakgroups$lpSolve[m]) == TRUE) {
+    if (grepl("Unknown", unique_peakgroups$Flag_RF[m]) == TRUE & grepl("No", unique_peakgroups$lpSolve[m]) == TRUE) {
       unique_peakgroups$code[m] <- "LP_Solve_Failure"
     }
   }
 
   for (m in 1:length(unique_peakgroups$match_ID)) {
-    if (grepl("Unknown", unique_peakgroups$Flag[m]) == TRUE & grepl("Maybe", unique_peakgroups$lpSolve[m]) == TRUE) {
+    if (grepl("Unknown", unique_peakgroups$Flag_RF[m]) == TRUE & grepl("Maybe", unique_peakgroups$lpSolve[m]) == TRUE) {
       unique_peakgroups$code[m] <- "LP_Solve_Maybe"
     }
   }

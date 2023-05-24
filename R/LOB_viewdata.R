@@ -77,6 +77,8 @@ LOB_viewdata <- function(peakdata, rawSpec = NULL){
           column(6,
                 tableOutput(outputId = "info"),
                 actionButton(inputId = "Find_ms2",label = "Check for MS2"),
+                actionButton(inputId = "Plot_ms2",label = "Plot MS2"),
+                textInput(inputId = "ms2_file",label = "File for MS2",value = "most_scans"),
                 numericInput(inputId = "ppm",label = "ppm",value = 100,min = 0.5,step = 1),
                 numericInput(inputId = "rtspan",label = "Retention Time Window (s)",value = 200,min = 0,step = 30),
                 textOutput(outputId = 'no_sel'),
@@ -154,7 +156,7 @@ LOB_viewdata <- function(peakdata, rawSpec = NULL){
 
         # Construct inital plot with limits and points
         g <- ggplot(data = data,mapping = aes(x = peakgroup_rt, y = LOBdbase_mz)) +
-          geom_point(aes(size=3)) +
+          geom_point(size = 3) +
           xlab("Retention Time (sec)") +
           ylab("m/z")
 
@@ -310,6 +312,38 @@ LOB_viewdata <- function(peakdata, rawSpec = NULL){
              # output$no_sel <- renderText("Searching for ms2 data... Done!")
             }})
         }})
+        observeEvent(eventExpr = input$Plot_ms2, {
+          if (is.null(rawSpec)) {
+            output$no_sel <- renderText(paste("No rawSpec objected loaded to read MS2 from."))
+          }else{
+            run_table <- nearPoints(data, input$plot_click, threshold = 20, maxpoints = 1,
+                                    addDist = TRUE)
+            withProgress(expr = {
+              incProgress(amount = 0.5,message = "Working...")
+              if(nrow(run_table)==0){
+                output$no_sel <- renderText(
+                  "Please click a feature on the plot to select it first.")
+
+              }else{
+                output$no_sel <- renderText(
+                paste("Plotting ms2 data for mass",as.character(run_table$LOBdbase_mz),"... please wait."))
+                ms2plot <- LOB_plotMS2(XCMSnExp = rawSpec,
+                                   mz = run_table$LOBdbase_mz,
+                                   rt = run_table$peakgroup_rt,
+                                   ppm_pre = input$ppm,
+                                   rtspan = input$rtspan,
+                                   plot_file = ms2_file)
+                output$ms2plot <- renderImage({
+                  ms2plot[[1]]
+                })
+                if (class(ms2[[1]]) == "data.frame") {
+                  output$no_sel <- renderText(
+                    paste("Searching for ms2 data for mass",as.character(run_table$LOBdbase_mz),"... Done. First file with most scans:",as.character(names(which(table(ms2[[1]][,'file']) == max(table(ms2[[1]][,'file']))))[1]))
+                  )}
+
+                # output$no_sel <- renderText("Searching for ms2 data... Done!")
+              }})
+          }})
 
         g
 
