@@ -33,13 +33,11 @@ LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_file = "closest_scan", m
     }
   }
 
-
   if (!is.null(peakdata) & (!is.null(mz) | !is.null(rt))) { # Peakdata overides mz and rt slots
     warning("You have provided 'peakdata' as well as 'mz' and/or 'rt' values. 'mz' and 'rt' inputs will be ignored and will be read from 'peakdata'.")
     mz <- NULL
     rt <- NULL
   }
-
 
   range_calc <- function(x) {
     range <- x * (0.000001 * diagnostic_ppm) # calculate mz range for filtering chrom
@@ -72,6 +70,9 @@ LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_file = "closest_scan", m
     nlrange <- lapply(NL, range_calc)
   }
 
+  #set plot final to return NA if no spectra is found
+  plot_final <- NA
+
   # Find MS2 spectra scans for lipids
   scans <- LOB_findMS2(
     XCMSnExp = XCMSnExp,
@@ -82,7 +83,7 @@ LOB_plotMS2 <- function(XCMSnExp, peakdata = NULL, plot_file = "closest_scan", m
     ppm_pre = ppm_pre
   )
 
-  # if-then statments too select file to plot scans from
+  # if-then statements too select file to plot scans from
   if (!is.null(file)) { # check if user specified a file
     most <- lapply(
       scans,
