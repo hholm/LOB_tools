@@ -338,11 +338,11 @@ LOB_viewdata <- function(peakdata, rawSpec = NULL){
                                    rt = run_table$peakgroup_rt,
                                    ppm_pre = input$ppm,
                                    rtspan = input$rtspan,
-                                   plot_file = ms2_file)
+                                   plot_file = input$ms2_file)
                 output$ms2plot <- renderImage({
                   ms2plot[[1]]
                 })
-                if (class(ms2[[1]]) == "data.frame") {
+                if (class(ms2plot[[1]]) == "data.frame") {
                   output$no_sel <- renderText(
                     paste("Searching for ms2 data for mass",as.character(run_table$LOBdbase_mz),"... Done. First file with most scans:",as.character(names(which(table(ms2[[1]][,'file']) == max(table(ms2[[1]][,'file']))))[1]))
                   )}
