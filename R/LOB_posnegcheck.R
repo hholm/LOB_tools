@@ -1,7 +1,7 @@
 # This is a program to cross check LOBSets in positive against negative modes
 # to tag peaks identified within in both modes
 
-LOB_posneg_check <- function(pos_coded_LOBpeaklist,
+LOB_posnegcheck <- function(pos_coded_LOBpeaklist,
                              neg_coded_LOBpeaklist,
                              class = NULL,
                              ignore_class = NULL,
