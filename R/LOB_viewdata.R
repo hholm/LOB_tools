@@ -67,7 +67,7 @@ LOB_viewdata <- function(peakdata, rawSpec = NULL){
           ),
           column(3,
                  selectInput('class', 'Select Lipid Class', c("All", as.character(unique(run$species))), multiple = TRUE, selected = "All"),
-                 selectInput('color', 'Point Color', c('None','Carbon','Double Bonds', 'Degree Oxidation','Species', 'Lipid Class', 'lpSolve Fitted', 'RF_Window', 'Lipid Class','Adduct Summary','Final Code')),
+                 selectInput('color', 'Point Color', c('None','Carbon','Double Bonds', 'Degree Oxidation','Species', 'Lipid Class', 'lpSolve Fitted', 'RF_Window', 'Lipid Class','Adduct Summary','Final Code', 'PosNeg Match')),
                  selectInput('total_carbon', 'Acyl Carbon', c('All',unique(run$FA_total_no_C)), multiple = TRUE, selected = "All"),
                  selectInput('total_db', 'Doubled Bonds', c('All',unique(run$FA_total_no_DB)), multiple = TRUE, selected = "All"),
                  selectInput('deg_ox', 'Degree Oxidation', c('All',unique(run$degree_oxidation)), multiple = TRUE, selected = "All"),
@@ -229,6 +229,12 @@ LOB_viewdata <- function(peakdata, rawSpec = NULL){
           g <- g + geom_point(aes(color=as.character(code), fill = as.character(code)),size=3) +
             scale_color_manual(values = c("LP_Solve_Confirmed"="#66CD00", "10%_rtv"="#66CD00","False_Assignment"="#FF3030", "Red"="#FF3030","RTF_Confirmed"="#2aff00", "ms2v"="#0000FF", "5%_rtv"="#2aff00","LP_Solve_Maybe"="#ff9e44", "Double_Peak?"="#ff9e44", "Double Check"="#ff9e44","Unknown"="#000000", "LP_Solve_Failure"="#B22222", "RTF_Failure"="#B22222"))
         }
+        
+        #Add color for final code
+        if(input$color=="PosNeg Match"){
+          g <- g + geom_point(aes(color=as.character(posneg_check), fill = as.character(posneg_check)),size=3) +
+            scale_color_manual(values = c("No Match" = "#FF3030", "PosNeg Match" = "#2aff00", "Check Multiple Matches" = "#ff9e44", "Unknown" = "#000000"))
+        }
 
         #Add color for adduct summary
         if(input$color=="Adduct Summary"){
@@ -277,7 +283,7 @@ LOB_viewdata <- function(peakdata, rawSpec = NULL){
           # addDist: add column with distance, in pixels
           run_table <- nearPoints(data, input$plot_click, threshold = 20, maxpoints = 1,
                                   addDist = TRUE)
-          columns <- c("xcms_peakgroup","compound_name","LOBdbase_mz","peakgroup_rt","Flag","lpSolve","code")
+          columns <- c("xcms_peakgroup","compound_name","LOBdbase_mz","peakgroup_rt","Flag","lpSolve","code", "posneg_check")
           run[which(run$xcms_peakgroup == run_table$xcms_peakgroup),columns[which(columns %in% colnames(run))]]
         }, digits = 5)
 
