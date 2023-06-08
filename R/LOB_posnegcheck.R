@@ -21,8 +21,8 @@ LOB_posnegcheck <- function(pos_coded_LOBpeaklist,
     pos_peaklist <- subset(pos_coded_LOBpeaklist, (pos_coded_LOBpeaklist$species %in% class & pos_coded_LOBpeaklist$degree_oxidation == 1))
     neg_peaklist <- subset(neg_coded_LOBpeaklist, (neg_coded_LOBpeaklist$species %in% class & pos_coded_LOBpeaklist$degree_oxidation == 1))
   }else{
-    pos_peaklist <- subset(pos_coded_LOBpeaklist, (pos_coded_LOBpeaklist$degree_oxidation == 0) | (pos_coded_LOBpeaklist$species == "dLCB_GSL_No_FA_OH" & pos_coded_LOBpeaklist$degree_oxidation == 1))
-    neg_peaklist <- subset(neg_coded_LOBpeaklist, (neg_coded_LOBpeaklist$degree_oxidation == 0) | (neg_coded_LOBpeaklist$species == "dLCB_GSL_No_FA_OH" & neg_coded_LOBpeaklist$degree_oxidation == 1))
+    pos_peaklist <- pos_coded_LOBpeaklist
+    neg_peaklist <- neg_coded_LOBpeaklist
   }
 
   # remove ignored classes if specified
@@ -30,11 +30,11 @@ LOB_posnegcheck <- function(pos_coded_LOBpeaklist,
     pos_peaklist <- subset(pos_coded_LOBpeaklist, (!(pos_coded_LOBpeaklist$species %in% ignore_class) & pos_coded_LOBpeaklist$degree_oxidation == 1))
     neg_peaklist <- subset(neg_coded_LOBpeaklist, (!(neg_coded_LOBpeaklist$species %in% ignore_class) & neg_coded_LOBpeaklist$degree_oxidation == 1))
   }else{
-    pos_peaklist <- subset(pos_coded_LOBpeaklist, (pos_coded_LOBpeaklist$degree_oxidation == 0) | (pos_coded_LOBpeaklist$species == "dLCB_GSL_No_FA_OH" & pos_coded_LOBpeaklist$degree_oxidation == 1))
-    neg_peaklist <- subset(neg_coded_LOBpeaklist, (neg_coded_LOBpeaklist$degree_oxidation == 0) | (neg_coded_LOBpeaklist$species == "dLCB_GSL_No_FA_OH" & neg_coded_LOBpeaklist$degree_oxidation == 1))
+    pos_peaklist <- pos_coded_LOBpeaklist
+    neg_peaklist <- neg_coded_LOBpeaklist
   }
 
-  extra_pos_peaklist <- subset(pos_coded_LOBpeaklist, !(pos_coded_LOBpeaklist$match_ID %in% pos_peaklist$match_ID))
+  #extra_pos_peaklist <- subset(pos_coded_LOBpeaklist, !(pos_coded_LOBpeaklist$match_ID %in% pos_peaklist$match_ID))
 
   # set auto RT window of 20 seconds unless specified
   if(!is.null(rt_window)){
@@ -88,12 +88,12 @@ LOB_posnegcheck <- function(pos_coded_LOBpeaklist,
     cat("Checking assignment", i, "of", nrow(pos_peaklist))
   }
 
-  extra_pos_peaklist$posneg_check <- "Unknown"
-  recombined <- bind_rows(posneg_crosschecked, extra_pos_peaklist)
+  #extra_pos_peaklist$posneg_check <- "Unknown"
+  #recombined <- bind_rows(posneg_crosschecked, extra_pos_peaklist)
 
   cat("\nDone!")
-  return(recombined)
-
+  #return(recombined)
+  return(posneg_crosschecked)
 
 }
 
