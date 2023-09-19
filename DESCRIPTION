@@ -1,5 +1,5 @@
 Package: LOBtools
-Title: Data Screening And Cleaning Tools For R
+Title: Additional Data Screening And Cleaning Tools For LOBSTAHS
 Version: 0.0.1.0
 Authors@R: c(
 	person("Henry", "Holm", email = "hholm@whoi.edu", 
