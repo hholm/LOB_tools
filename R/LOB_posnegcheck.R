@@ -38,28 +38,37 @@ LOB_posnegcheck <- function(pos_coded_LOBpeaklist,
     neg_peaklist <- subset(neg_coded_LOBpeaklist, (neg_coded_LOBpeaklist$degree_oxidation == 0) | (neg_coded_LOBpeaklist$species == "dLCB_GSL_No_FA_OH" & neg_coded_LOBpeaklist$degree_oxidation == 1))
   }
 
-  # make dataframes of lipids that won't be crosschecked against the negative set
+  # if replacing positive lipid classes with their negative counterparts (e.g. DAG's)
+  # this section sets up the necessary dataframes
   if(!is.null(neg_replacement)){
+
+    # make dataframes of lipids that won't be crosschecked against the corresponding positive/negative sets
+    # first, extra_pos, which is a subset of the full "raw" coded peaklist,
+    # including all oxidized lipids, that haven't already been subset into pos_peaklist
     extra_pos_peaklist <- subset(pos_coded_LOBpeaklist, !(pos_coded_LOBpeaklist$match_ID %in% pos_peaklist$match_ID) & !(pos_coded_LOBpeaklist$species %in% neg_replacement))
+    #next, do the same thing except it's only the species being included by neg_replacement (e.g. oxidized FFA's and DAG's)
     extra_neg_peaklist <- subset(neg_coded_LOBpeaklist, !(neg_coded_LOBpeaklist$match_ID %in% neg_peaklist$match_ID) & (neg_coded_LOBpeaklist$species %in% neg_replacement))
-  }else{
-    extra_pos_peaklist <- subset(pos_coded_LOBpeaklist, !(pos_coded_LOBpeaklist$match_ID %in% pos_peaklist$match_ID))
-}
 
-
-
-
-  # temporarily remove classes where the negative ion mode data will replace positive ion mode data
-  # to be cross checked after the positive mode
-  if(!is.null(neg_replacement)){
+    # temporarily remove classes where the negative ion mode data will replace positive ion mode data
+    # to be cross checked after the positive mode
     pos_to_replace <- subset(pos_peaklist, (!(pos_peaklist$species %in% neg_replacement)))  # positive species to be replaced
     neg_to_replace <- subset(neg_peaklist, ((neg_peaklist$species %in% neg_replacement))) # negative species to replace them
+
+    #set up positive and negative dataframes to cross check
     posneg_crosschecked <- subset(pos_peaklist, (!(pos_peaklist$species %in% neg_replacement)))  # subset pos_peaklist down
     posneg_crosschecked$posneg_check <- "Unknown"
-  }else{
-    posneg_crosschecked  <- pos_peaklist
-    posneg_crosschecked$posneg_check <- "Unknown"
-  }
+
+    negpos_crosschecked <- neg_to_replace
+    negpos_crosschecked$posneg_check <- "Unknown"
+
+    }else{
+
+      #set up dataframes to cross check
+      extra_pos_peaklist <- subset(pos_coded_LOBpeaklist, !(pos_coded_LOBpeaklist$match_ID %in% pos_peaklist$match_ID))
+      posneg_crosschecked  <- pos_peaklist
+      posneg_crosschecked$posneg_check <- "Unknown"
+
+    }
 
   # set auto RT window of 20 seconds unless specified
   if(!is.null(rt_window)){
@@ -69,15 +78,16 @@ LOB_posnegcheck <- function(pos_coded_LOBpeaklist,
   }
 
 
-
-  for(i in 1:length(posneg_crosschecked$match_ID)){
+  # cross checking positive set
+  for(i in 1:length(posneg_crosschecked$compound_name)){
 
     # subset peaks in negative mode with the same compound name
-    same_compound_name <- neg_peaklist[neg_peaklist$compound_name %in% pos_peaklist$compound_name[i],]
+    same_compound_name <- neg_peaklist[neg_peaklist$compound_name %in% posneg_crosschecked$compound_name[i],]
 
     if(length(same_compound_name$match_ID) > 0){
+
       # calculate acceptable rt range of positive mode rt
-      rt_pos <- pos_peaklist$peakgroup_rt[i]
+      rt_pos <- posneg_crosschecked$peakgroup_rt[i]
       max_rt <- rt_pos + rt_win
       min_rt <- rt_pos - rt_win
 
@@ -87,7 +97,7 @@ LOB_posnegcheck <- function(pos_coded_LOBpeaklist,
       # check every row with the same compound name
       for(j in length(same_compound_name$peakgroup_rt)){
         if(same_compound_name$peakgroup_rt[j] >= min_rt & same_compound_name$peakgroup_rt[j] <= max_rt){
-          # add matching match_ID to the d
+          # add to the counter
           negative_matches <- negative_matches + 1
         }
       }
@@ -105,15 +115,11 @@ LOB_posnegcheck <- function(pos_coded_LOBpeaklist,
   }
 
   # Now using the same loop to cross check the classes where negative mode classes will replace positive mode
-
   if(!is.null(neg_replacement)){
 
     cat("\nNow cross checking negative vs. positive ion modes in selected lipid classes to replace.")
 
-    negpos_crosschecked <- neg_peaklist
-    negpos_crosschecked$posneg_check <- "Unknown"
-
-    for(i in 1:length(negpos_crosschecked$match_ID)){
+    for(i in 1:length(negpos_crosschecked$compound_name)){
 
 
       # i = 2275
@@ -121,11 +127,11 @@ LOB_posnegcheck <- function(pos_coded_LOBpeaklist,
       #
       #
       # subset peaks in positive mode with the same compound name
-      same_compound_name <- pos_peaklist[pos_peaklist$compound_name %in% neg_peaklist$compound_name[i],]
+      same_compound_name <- pos_to_replace[pos_to_replace$compound_name %in% negpos_crosschecked$compound_name[i],]
 
       if(length(same_compound_name$match_ID) > 0){
         # calculate acceptable rt range of negative mode rt
-        rt_neg <- neg_peaklist$peakgroup_rt[i]
+        rt_neg <- negpos_crosschecked$peakgroup_rt[i]
         max_rt <- rt_neg + rt_win
         min_rt <- rt_neg - rt_win
 
@@ -176,22 +182,22 @@ LOB_posnegcheck <- function(pos_coded_LOBpeaklist,
 #######
 # library(tidyverse)
 #
-# test <- LOB_posneg_check(pos_coded_LOBpeaklist = raw_pos_LOBset,
-#                           neg_coded_LOBpeaklist = raw_neg_LOBset,
-#                           neg_replacement = c("DAG", "FFA"))
-# #test <- raw_pos_LOBset #74282
-#
-# test1 <- test %>% filter(species == "FFA") #269
-# test2 <- raw_neg_LOBset %>% filter(species == "FFA") #269
-#
-# test3 <- raw_pos_LOBset %>% filter(species == "DAG") #1410
-# test4 <- raw_neg_LOBset %>% filter(species == "DAG") #646
-# test5 <- test %>% filter(species == "DAG")#646
-#
-# test6 <- raw_pos_LOBset %>% filter(species != "TAG")# 19835
-# test7 <- raw_pos_LOBset %>% filter(species == "TAG")#2075
-# test8 <- raw_pos_LOBset #2075
-#test9 <- CoePro_Final #5996
+test <- LOB_posnegcheck(pos_coded_LOBpeaklist = raw_pos_LOBset,
+                          neg_coded_LOBpeaklist = raw_neg_LOBset,
+                          neg_replacement = c("DAG", "FFA"))
+#test <- raw_pos_LOBset #74282
+
+test1 <- test %>% filter(species == "FFA") #269
+test2 <- raw_neg_LOBset %>% filter(species == "FFA") #269
+
+test3 <- raw_pos_LOBset %>% filter(species == "DAG") #1410
+test4 <- raw_neg_LOBset %>% filter(species == "DAG") #646
+test5 <- test %>% filter(species == "DAG")#646
+
+test6 <- raw_pos_LOBset %>% filter(species != "TAG")# 19835
+test7 <- raw_pos_LOBset %>% filter(species == "TAG")#2075
+test8 <- raw_pos_LOBset #2075
+test9 <- CoePro_Final #5996
 
 #########################
 
