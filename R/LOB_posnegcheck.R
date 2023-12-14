@@ -182,22 +182,22 @@ LOB_posnegcheck <- function(pos_coded_LOBpeaklist,
 #######
 # library(tidyverse)
 #
-test <- LOB_posnegcheck(pos_coded_LOBpeaklist = raw_pos_LOBset,
-                          neg_coded_LOBpeaklist = raw_neg_LOBset,
-                          neg_replacement = c("DAG", "FFA"))
-#test <- raw_pos_LOBset #74282
-
-test1 <- test %>% filter(species == "FFA") #269
-test2 <- raw_neg_LOBset %>% filter(species == "FFA") #269
-
-test3 <- raw_pos_LOBset %>% filter(species == "DAG") #1410
-test4 <- raw_neg_LOBset %>% filter(species == "DAG") #646
-test5 <- test %>% filter(species == "DAG")#646
-
-test6 <- raw_pos_LOBset %>% filter(species != "TAG")# 19835
-test7 <- raw_pos_LOBset %>% filter(species == "TAG")#2075
-test8 <- raw_pos_LOBset #2075
-test9 <- CoePro_Final #5996
+# test <- LOB_posnegcheck(pos_coded_LOBpeaklist = raw_pos_LOBset,
+#                           neg_coded_LOBpeaklist = raw_neg_LOBset,
+#                           neg_replacement = c("DAG", "FFA"))
+# #test <- raw_pos_LOBset #74282
+#
+# test1 <- test %>% filter(species == "FFA") #269
+# test2 <- raw_neg_LOBset %>% filter(species == "FFA") #269
+#
+# test3 <- raw_pos_LOBset %>% filter(species == "DAG") #1410
+# test4 <- raw_neg_LOBset %>% filter(species == "DAG") #646
+# test5 <- test %>% filter(species == "DAG")#646
+#
+# test6 <- raw_pos_LOBset %>% filter(species != "TAG")# 19835
+# test7 <- raw_pos_LOBset %>% filter(species == "TAG")#2075
+# test8 <- raw_pos_LOBset #2075
+# test9 <- CoePro_Final #5996
 
 #########################
 
