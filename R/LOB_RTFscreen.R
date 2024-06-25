@@ -8,7 +8,7 @@
 # original_data <- read.csv("Nano_Intermediate_Third_Pos_Raw_LOBSTAHS_screened_peakdata_2019-06-18T2-27-43_PM-0400.csv")
 # RT_Factor_Dbase <-read.csv("C:/Users/TSQ/Desktop/Daniel Lowenstein/Older_Projects/RT_Factors/Hummel RtF Master Database - rtf_data.csv")
 
-LOB_RTFscreen <- function(peakdata, LOBdbase, standard = "DNPPE",entry = NULL, choose_class = NULL,
+LOB_RTFscreen <- function(peakdata, LOBdbase, standard = "DNPPE", dataset = NA, choose_class = NULL,
                         plot_data = FALSE, save_plots = FALSE, data_title) {
 
   # library(tidyr)
@@ -70,14 +70,24 @@ LOB_RTFscreen <- function(peakdata, LOBdbase, standard = "DNPPE",entry = NULL, c
     )
   }
 
-  if (is.null(entry)) {
-    warning(
-      "No RTF entry choosen. Using average RTF for the standard. Availible entries include: ",names(LOBdbase@rtf[[standard]])
+  if (all(is.na(dataset))) {
+    print(
+      "Using RTFs from all datasets in database."
     )
+    dataset <- unique(LOBdbase@rtf$dataset)
   }
 
-  #store the rtf data for usage later
-  RT_Factor_Dbase <- LOBdbase@rtf[[standard]][[entry]]$data
+  # store our rtf info
+  RT_Factor_Dbase <- dplyr::summarise(
+    dplyr::group_by(
+      LOBdbase@rtf[which(LOBdbase@rtf$value_type == 'rtf' & LOBdbase@rtf$standard == standard & LOBdbase@rtf$dataset %in% dataset),],
+      compound_name
+    ),
+    factor = mean(as.numeric(value),na.rm = T)
+  )
+
+  #check for ms2 versification entries in datasets
+  RT_Factor_Dbase[RT_Factor_Dbase$compound_name %in% LOBdbase@rtf[which(LOBdbase@rtf$value_type == 'ms2' & LOBdbase@rtf$dataset %in% dataset),"compound_name"],"ms2v"] <- TRUE
 
   # make sure peakgroup rt is numeric
   original_data$peakgroup_rt <- as.numeric(original_data$peakgroup_rt)
@@ -122,12 +132,15 @@ LOB_RTFscreen <- function(peakdata, LOBdbase, standard = "DNPPE",entry = NULL, c
     )
   }
 
-  # Add column for DNPPE factor and an empty one for flagging IF none exists
+  # Add column for standard factor and an empty one for flagging IF none exists
   if (is.null(original_data$Flag)){
   original_data <- original_data %>%
-    dplyr::mutate(DNPPE_Factor = peakgroup_rt / std_rt, Flag = "None", DBase_std_RF = "NA") %>%
+    dplyr::mutate(temp_factor = peakgroup_rt / std_rt, Flag = "None", DBase_std_RF = "NA") %>%
     subset(species != "NA")
-}
+  }
+
+  colnames(original_data)[colnames(original_data) == "temp_factor"] <- paste0(standard,"_Factor")
+
   # isolate major intact polar lipid classes, unoxidized (need to add pigments, etc.)
   Main_Lipids <- original_data %>%
     subset(degree_oxidation == "0") %>%
@@ -148,15 +161,10 @@ LOB_RTFscreen <- function(peakdata, LOBdbase, standard = "DNPPE",entry = NULL, c
   Main_Lipids$Flag <- unlist(apply(
     Main_Lipids, 1,
     function(x) {
-      if (x["compound_name"] %in% LOBdbase@parent_compound_name) {
-        #since LOBdbbase has entry for every adduct just get the highest one (should all be same info)
-        if(!is.na(RT_Factor_Dbase$factor[which(LOBdbase@parent_compound_name == x["compound_name"] & LOBdbase@adduct_rank == 1)])){
-          "Known"
-        }else{
-          "Unknown"
-        }
+      if (x["compound_name"] %in% RT_Factor_Dbase$compound_name) {
+        "Known"
       }else{
-        "Not In Database"
+        "Unknown"
       }
     }
   ))
@@ -166,17 +174,21 @@ LOB_RTFscreen <- function(peakdata, LOBdbase, standard = "DNPPE",entry = NULL, c
   Known_RtFs <- Main_Lipids %>% subset(Flag == "Known")
   Unknown_RtFs <- Main_Lipids %>% subset(Flag == "Unknown")
 
+  if(nrow(Known_RtFs) == 0){
+    print("No RTFs for dataset and class specified.")
+    stop()
+    }
+
   # for each compound in the "Known" df, grab its corresponding row number in RT_Factor_Dbase,
   # then flag it as follows
   # first check if it's in a 10%
   cat("\n")
   for (i in 1:length(Known_RtFs$compound_name)) {
-    which_row <- as.numeric(which(grepl(paste0("^", Known_RtFs$compound_name[i], "$"), LOBdbase@parent_compound_name)))
-    Known_RtFs$DBase_std_RF[i] <- RT_Factor_Dbase$factor[which_row]
-
-    if (Known_RtFs$DNPPE_Factor[i] < (RT_Factor_Dbase$factor[which_row] * 1.1) & Known_RtFs$DNPPE_Factor[i] > (RT_Factor_Dbase$factor[which_row] * 0.9)) {
-      if (Known_RtFs$DNPPE_Factor[i] < (RT_Factor_Dbase$factor[which_row] * 1.05) & Known_RtFs$DNPPE_Factor[i] > (RT_Factor_Dbase$factor[which_row] * 0.95)) {
-        if (!is.na(RT_Factor_Dbase$ms2v[which_row]) & RT_Factor_Dbase$ms2v[which_row] == TRUE) {
+    which_row <- which(RT_Factor_Dbase$compound_name == Known_RtFs$compound_name[i])
+    Known_RtFs$DBase_std_RF[i] <- as.numeric(RT_Factor_Dbase[which_row,"factor"])
+    if (Known_RtFs[i,paste0(standard,"_Factor")] < (RT_Factor_Dbase[which_row,"factor"] * 1.1) & Known_RtFs[i,paste0(standard,"_Factor")] > (RT_Factor_Dbase[which_row,"factor"] * 0.9)) {
+      if (Known_RtFs[i,paste0(standard,"_Factor")] < (RT_Factor_Dbase[which_row,"factor"] * 1.05) & Known_RtFs[i,paste0(standard,"_Factor")] > (RT_Factor_Dbase[which_row,"factor"] * 0.95)) {
+        if (!is.na(RT_Factor_Dbase[which_row,"ms2v"]) & RT_Factor_Dbase[which_row,"ms2v"]) {
           Known_RtFs$Flag[i] <- "ms2v"
         } else {
           Known_RtFs$Flag[i] <- "5%_rtv"
@@ -242,7 +254,7 @@ LOB_RTFscreen <- function(peakdata, LOBdbase, standard = "DNPPE",entry = NULL, c
 
   #insure the correct classes on certain output
   Flagged_Data$Flag_RF <- factor(Flagged_Data$Flag, levels = c("Red", "ms2v", "5%_rtv", "10%_rtv", "Double_Peak?", "Unknown"))
-  Flagged_Data$DBase_std_RF <- as.numeric(Flagged_Data$DBase_std_RF)
+  suppressWarnings(Flagged_Data$DBase_std_RF <- as.numeric(Flagged_Data$DBase_std_RF))
 
 
   if (plot_data == TRUE) {

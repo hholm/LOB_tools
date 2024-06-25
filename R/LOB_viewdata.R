@@ -5,6 +5,7 @@ LOB_viewdata <- function(peakdata, rawSpec = NULL){
   #library(tidyverse)
   #library(RColorBrewer)
   #library(ggplot2)
+  # Example
 
   if (!class(peakdata) %in% c("data.frame","LOBSet")) {
     stop("Input peakdata is neither a 'data.frame' nor 'LOBSet'.")
@@ -229,7 +230,7 @@ LOB_viewdata <- function(peakdata, rawSpec = NULL){
           g <- g + geom_point(aes(color=as.character(code), fill = as.character(code)),size=3) +
             scale_color_manual(values = c("LP_Solve_Confirmed"="#66CD00", "10%_rtv"="#66CD00","False_Assignment"="#FF3030", "Red"="#FF3030","RTF_Confirmed"="#2aff00", "ms2v"="#0000FF", "5%_rtv"="#2aff00","LP_Solve_Maybe"="#ff9e44", "Double_Peak?"="#ff9e44", "Double Check"="#ff9e44","Unknown"="#000000", "LP_Solve_Failure"="#B22222", "RTF_Failure"="#B22222"))
         }
-        
+
         #Add color for final code
         if(input$color=="PosNeg Match"){
           g <- g + geom_point(aes(color=as.character(posneg_check), fill = as.character(posneg_check)),size=3) +
@@ -283,7 +284,7 @@ LOB_viewdata <- function(peakdata, rawSpec = NULL){
           # addDist: add column with distance, in pixels
           run_table <- nearPoints(data, input$plot_click, threshold = 20, maxpoints = 1,
                                   addDist = TRUE)
-          columns <- c("xcms_peakgroup","compound_name","LOBdbase_mz","peakgroup_rt","Flag","lpSolve","code", "posneg_check")
+          columns <- c("match_ID","xcms_peakgroup","compound_name","LOBdbase_mz","peakgroup_rt","Flag","lpSolve","code", "posneg_check")
           run[which(run$xcms_peakgroup == run_table$xcms_peakgroup),columns[which(columns %in% colnames(run))]]
         }, digits = 5)
 
