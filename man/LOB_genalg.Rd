@@ -74,7 +74,7 @@ LOB_RTFsort(LOBSet, RT_Factor_Dbase, choose_class = NULL, plot_data = TRUE, save
 }
 
 \references{
-%% ~put references to the literature/web site here ~
+Need to put references to the literature/web site here 
 }
 \author{
 Henry Holm, hholm@mit.edu \cr
