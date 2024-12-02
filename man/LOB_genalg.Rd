@@ -30,7 +30,7 @@ LOB_genalg <- function(peakdata, choose_class = NULL, save.files = FALSE,
   A \code{logical} indicating whether the plots should be saved (TRUE) or should not be (FALSE) to the current working directory.
 }
   \item{use_ms2}{
-  A \code{logical} indicating whether each class should be prescreened based on MS2 verified peaks. The \code{LOB_RTFsort} function must be first used to flag annotations."
+  A \code{logical} indicating whether each class should be prescreened based on MS2 verified peaks. The \code{LOB_RTFsort} function must be first used to flag annotations.
 }
 
   \item{hijacking}{
