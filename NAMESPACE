@@ -1,5 +1,5 @@
 import("lpSolveAPI",
-       "genalg",
+       #"genalg",
        "shiny",
        "ggplot2",
        "tidyr",
